@@ -1,0 +1,6 @@
+framework module Restler {
+  umbrella header "Restler-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -3,11 +3,15 @@ use_frameworks!
 
 target 'Restler_Example', :exclusive => true do
   pod "Restler", :path => "../"
+  pod "Restler/CoreData", :path => "../"
+  pod "DStack", :path => "../../FACoreData"
 end
 
 target 'Restler_Tests', :exclusive => true do
   pod "Restler", :path => "../"
-
+  pod "Restler/CoreData", :path => "../"
+  pod "DStack", :path => "../../FACoreData"
+  
   pod 'Quick', '~> 0.3.1'
   pod 'Nimble'
   pod 'FBSnapshotTestCase'

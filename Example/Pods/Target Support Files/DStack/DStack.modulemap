@@ -1,0 +1,6 @@
+framework module DStack {
+  umbrella header "DStack-umbrella.h"
+
+  export *
+  module * { export * }
+}

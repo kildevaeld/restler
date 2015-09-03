@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3AE138DC1B97A4CF001286EA /* Concert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE138D91B97A4CF001286EA /* Concert.swift */; };
+		3AE138DD1B97A4CF001286EA /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3AE138DA1B97A4CF001286EA /* Model.xcdatamodeld */; };
+		3AE138E11B97BA34001286EA /* Genre.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE138E01B97BA34001286EA /* Genre.swift */; };
 		4E3B38520049A7FFE614A838 /* Pods_Restler_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C43F39BB32EB85F3FFABA21A /* Pods_Restler_Example.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
@@ -30,6 +33,9 @@
 /* Begin PBXFileReference section */
 		30115EAD597222320629D3F0 /* Pods-Restler_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Restler_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Restler_Example/Pods-Restler_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		326CAB260D0D935395B94258 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		3AE138D91B97A4CF001286EA /* Concert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Concert.swift; sourceTree = "<group>"; };
+		3AE138DB1B97A4CF001286EA /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
+		3AE138E01B97BA34001286EA /* Genre.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Genre.swift; sourceTree = "<group>"; };
 		493517F7579311B972153792 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		5C40FCA5BA2DCE258894CC33 /* Pods-Restler_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Restler_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-Restler_Tests/Pods-Restler_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* Restler_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Restler_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -39,14 +45,14 @@
 		607FACDA1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		607FACE51AFB9204008FA782 /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = Tests.xctest; path = Restler_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		607FACE51AFB9204008FA782 /* Restler_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Restler_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		655F57E4F442C53B2A03F253 /* Pods_Restler_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Restler_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		682A6F5D30AF06E5A614EF3F /* Pods-Restler_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Restler_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-Restler_Example/Pods-Restler_Example.release.xcconfig"; sourceTree = "<group>"; };
 		C43F39BB32EB85F3FFABA21A /* Pods_Restler_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Restler_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E64D822F2FD32AAD5B65841D /* Pods-Restler_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Restler_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Restler_Tests/Pods-Restler_Tests.debug.xcconfig"; sourceTree = "<group>"; };
-		E96FFC810F45EDEABA79E3F1 /* Restler.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = Restler.podspec; path = ../Restler.podspec; sourceTree = "<group>"; };
+		E96FFC810F45EDEABA79E3F1 /* Restler.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = Restler.podspec; path = ../Restler.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,7 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				607FACD01AFB9204008FA782 /* Restler_Example.app */,
-				607FACE51AFB9204008FA782 /* Tests.xctest */,
+				607FACE51AFB9204008FA782 /* Restler_Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -93,6 +99,9 @@
 		607FACD21AFB9204008FA782 /* Example for Restler */ = {
 			isa = PBXGroup;
 			children = (
+				3AE138D91B97A4CF001286EA /* Concert.swift */,
+				3AE138E01B97BA34001286EA /* Genre.swift */,
+				3AE138DA1B97A4CF001286EA /* Model.xcdatamodeld */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				607FACD91AFB9204008FA782 /* Main.storyboard */,
@@ -200,7 +209,7 @@
 			);
 			name = Restler_Tests;
 			productName = Tests;
-			productReference = 607FACE51AFB9204008FA782 /* Tests.xctest */;
+			productReference = 607FACE51AFB9204008FA782 /* Restler_Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -359,7 +368,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
+				3AE138DC1B97A4CF001286EA /* Concert.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
+				3AE138DD1B97A4CF001286EA /* Model.xcdatamodeld in Sources */,
+				3AE138E11B97BA34001286EA /* Genre.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -573,6 +585,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		3AE138DA1B97A4CF001286EA /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				3AE138DB1B97A4CF001286EA /* Model.xcdatamodel */,
+			);
+			currentVersion = 3AE138DB1B97A4CF001286EA /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 607FACC81AFB9204008FA782 /* Project object */;
 }

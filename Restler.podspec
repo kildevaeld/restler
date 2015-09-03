@@ -1,40 +1,46 @@
 #
 # Be sure to run `pod lib lint Restler.podspec' to ensure this is a
-# valid spec before submitting.
+# valid spec and remove all comments before submitting the spec.
 #
-# Any lines starting with a # are optional, but their use is encouraged
+# Any lines starting with a # are optional, but encouraged
+#
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html
 #
 
 Pod::Spec.new do |s|
   s.name             = "Restler"
-  s.version          = "0.1.0"
+  s.version          = "0.0.1"
   s.summary          = "A short description of Restler."
-
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!  
   s.description      = <<-DESC
-                       DESC
+                       An optional longer description of Restler
 
-  s.homepage         = "https://github.com/<GITHUB_USERNAME>/Restler"
-  # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
+                       * Markdown format.
+                       * Don't worry about the indent, we strip it!
+                       DESC
+  s.homepage         = "https://github.com/kildevaeld/restler"
+  
   s.license          = 'MIT'
   s.author           = { "Softshag & Me" => "admin@softshag.dk" }
-  s.source           = { :git => "https://github.com/<GITHUB_USERNAME>/Restler.git", :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.source           = { :git => "https://github.com/kildevaeld/restler.git", :tag => s.version.to_s }
 
   s.platform     = :ios, '8.0'
   s.requires_arc = true
 
-  s.source_files = 'Pod/Classes/**/*'
-  s.resource_bundles = {
-    'Restler' => ['Pod/Assets/*.png']
-  }
+  s.default_subspec = 'Core'
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  s.subspec 'Core' do |cs|
+    cs.source_files = 'Pod/Classes/*'
+  end
+
+  s.subspec 'CoreData' do |cd|
+     cd.source_files = 'Pod/Classes/CoreData/**/*'
+     cd.framework = 'CoreData'
+     cd.dependency 'DStack'
+     cd.dependency 'SwiftyJSON'
+  end
+
+  s.dependency 'Bolts/Tasks'
+  s.dependency 'Alamofire'
+  s.dependency 'XCGLogger'
+
 end
