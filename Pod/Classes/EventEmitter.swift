@@ -133,11 +133,6 @@ public class EventEmitter {
     var handlers : [IEventHandler] = []
     public var emitQueue : dispatch_queue_t?
     
-    /*public func on<T: IEvent>(event: String, async: (event: T) -> BFTask) -> TEventHandler<T> {
-        let eventHandler = TEventHandler<T>(event:event,once: false, handler: .Async(async))
-        return self.listen(eventHandler) as! TEventHandler<T>
-    }*/
-    
     public func on<T: IEvent>(event: EventConvertible, handler: (event: T) -> Void) -> TEventHandler<T> {
         let eventHandler = TEventHandler<T>(event:event.eventName,once: false, handler: handler)
         return self.listen(eventHandler) as! TEventHandler<T>
@@ -186,29 +181,6 @@ public class EventEmitter {
     }
     
     public func emit<T> (eventName: EventConvertible, data: T? = nil) -> Self {
-        /*dispatch_async(self.emitQueue ?? dispatch_get_main_queue(), { () -> Void in
-            let event: IEvent
-            if let e = data as? IEvent {
-                event = e
-            } else {
-                event = TEvent<T>(sender: self as! AnyObject, name: eventName, data: data as? AnyObject)
-            }
-            var i = 0
-            var promises : [BFTask] = []
-            for handler in self.handlers {
-                if handler.event == eventName || handler.event == "all" {
-                    let task = handler.handle(event)
-                    promises.append(task)
-                    if handler.once {
-                        self.handlers.removeAtIndex(i)
-                    }
-                
-                }
-                
-                i++
-            }
-            
-        })*/
         
         let event: IEvent
         if let e = data as? IEvent {

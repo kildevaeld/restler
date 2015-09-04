@@ -47,6 +47,10 @@
 		3769B9433B301E32A9DC200E73038AF3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D08038BA46966052820D2B7603C2278B /* Foundation.framework */; };
 		380430B752D00A2A7FE6715576762B65 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B28CE75D467F29877424694149BC649 /* CoreData.framework */; };
 		39A8A7DB3537BDC61EF618B1737C1EB5 /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F861572AEF58AF8E8738463397C601 /* SwiftyJSON.swift */; };
+		3A26E2871B99AF3700C2268A /* Restler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3970351C85AA20F8584A36A1D17CA41 /* Restler.swift */; };
+		3A26E2881B99AF3D00C2268A /* Restler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3970351C85AA20F8584A36A1D17CA41 /* Restler.swift */; };
+		3A26E2891B99AF4700C2268A /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A26E2851B99AD8C00C2268A /* Request.swift */; };
+		3A26E28A1B99AF4900C2268A /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A26E2851B99AD8C00C2268A /* Request.swift */; };
 		3B9B87AD0FB95109749A8230D6CE000C /* BFExecutor.m in Sources */ = {isa = PBXBuildFile; fileRef = 17EB2F179B553AACDF2952A132BC1DB1 /* BFExecutor.m */; settings = {COMPILER_FLAGS = "-DOS_OBJECT_USE_OBJC=0"; }; };
 		3DEB60384704A13C652E3A41FE4407D5 /* EndWith.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F03E6CB6EB7451A7A1003A07546189E /* EndWith.swift */; };
 		3E96079F8FFAD02FCC85E14F1FA8A011 /* BeNil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D017CF3611CE7D91630978A08ECC5E /* BeNil.swift */; };
@@ -407,6 +411,7 @@
 		3943B1B9F529652F88D77D48F137BC0A /* Alamofire.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Alamofire.swift; path = Source/Alamofire.swift; sourceTree = "<group>"; };
 		396E436DD2056623A95E5FCC6E68A58C /* Nimble-Snapshots-Private.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Nimble-Snapshots-Private.xcconfig"; sourceTree = "<group>"; };
 		39D1FB210D5D7F019E11610233FED7AE /* NSManagedObjectContext+Functions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "NSManagedObjectContext+Functions.swift"; sourceTree = "<group>"; };
+		3A26E2851B99AD8C00C2268A /* Request.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
 		3A9D2E65669976F4F03D8E3529AFFC4C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3AA494EB861CE601FB01AAD2DB278E14 /* NMBExceptionCapture.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = NMBExceptionCapture.m; path = Nimble/objc/NMBExceptionCapture.m; sourceTree = "<group>"; };
 		405898307CA2C3AF8BCFD929E40EB6E1 /* Quick-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Quick-dummy.m"; sourceTree = "<group>"; };
@@ -826,6 +831,7 @@
 				21845FF6B705490592EC998C296BD110 /* Resource.swift */,
 				4BA95856E587761BE210F4626DEFC615 /* Response.swift */,
 				B3970351C85AA20F8584A36A1D17CA41 /* Restler.swift */,
+				3A26E2851B99AD8C00C2268A /* Request.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -1837,6 +1843,7 @@
 				F8187DA2C21CBE2E5463D43D33FDBB3B /* Resource.swift in Sources */,
 				E77580D725A7F1ED3FAEFA2CB2DBD9E3 /* Response.swift in Sources */,
 				36225891E35A7AB10F1060AC92F215FE /* Restler-dummy.m in Sources */,
+				3A26E28A1B99AF4900C2268A /* Request.swift in Sources */,
 				4BA24912A1DF3AE57827F02065657174 /* Restler.swift in Sources */,
 				E5F8DDE4741C9DC44FA996577B0F72AA /* coredata.swift in Sources */,
 			);
@@ -1847,6 +1854,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				71CF6F0E8BFF69DD3AF92B10C8CB68BF /* Pods-Restler_Example-dummy.m in Sources */,
+				3A26E2891B99AF4700C2268A /* Request.swift in Sources */,
+				3A26E2871B99AF3700C2268A /* Restler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1870,6 +1879,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				76640A4927A3791E573910D89CC231CE /* Pods-Restler_Tests-dummy.m in Sources */,
+				3A26E2881B99AF3D00C2268A /* Restler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

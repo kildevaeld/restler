@@ -22,21 +22,25 @@ func dispatch_main(fn:() -> Void) {
 public typealias ProgressBlock = (progress: Int64, total: Int64) -> Void
 public typealias CompletionBlock = (error: NSError?, data: AnyObject?, resource: Resource) -> Void
 
+public typealias serializer = (request: NSURLRequest, response: NSHTTPURLResponse?, data: NSData?) -> (AnyObject?, NSError?)
 
-/*func get_serializer(mime: String) -> ResponseSerializer? {
-    
-    switch mime {
-    case "application/json":
-        return Alamofire.Request.JSONResponseSerializer()
-    case "application/plist", "application/x-plist":
-        return Alamofire.Request.propertyListResponseSerializer()
-    default:
-        if Restler.serializers[mime] != nil {
-            return Restler.serializers[mime]!()
-        }
-        return nil
-    }
-}*/
+
+//func get_serializer(mime: String?) -> ResponseSerializer? {
+//    if mime == nil {
+//        return nil
+//    }
+//    switch mime! {
+//    case "application/json":
+//        return Alamofire.Request.JSONResponseSerializer().serializeResponse
+//    case "application/plist", "application/x-plist":
+//        return Alamofire.Request.propertyListResponseSerializer().serializeResponse
+//    default:
+//        if Restler.serializers[mime!] != nil {
+//            return Restler.serializers[mime!]
+//        }
+//        return nil
+//    }
+//}
 
 struct Listener : Equatable {
     var observer: AnyObject
@@ -105,7 +109,9 @@ public enum Events : EventConvertible {
 }
 
 public class Restler : NSObject {
-    //public static var serializers = Dictionary<String, () -> Alamofire.ResponseSerializer>()
+    public static var serializers: Dictionary<String,() -> serializer> = [
+        "application/json": { Alamofire.Request.JSONResponseSerializer(options: nil).serializeResponse },
+        "application/plist": {Alamofire.Request.propertyListResponseSerializer().serializeResponse }]
     static var log: XCGLogger {
         let log = XCGLogger()
         log.setup(logLevel: .Debug, showThreadName: false, showLogLevel: true, showFileNames: false, showLineNumbers: false, writeToFile: nil, fileLogLevel: nil)
@@ -141,12 +147,30 @@ public class Restler : NSObject {
                     progress?(progress: totalWritten, total: totalExpected)
                 }
             }
-            .response(queue: self.mapping_queue, responseSerializer: Request.JSONResponseSerializer(options: nil)) { (_, _, json, error) in
+            .response(queue: self.mapping_queue, responseSerializer: Request.dataResponseSerializer()) { (req, res, data, error) in
+                
+                if error != nil {
+                    task.setError(error)
+                    return
+                }
+                
+                if (res?.MIMEType == nil) {
+                    task.setResult(data)
+                    return
+                }
+                let serializer = Restler.serializers[res!.MIMEType!]
+                
+                if serializer == nil {
+                    task.setResult(data)
+                    return
+                }
+                
+                let (result: AnyObject?, error) = serializer!()(request: req,response: res,data: data)
                 
                 if error != nil {
                     task.setError(error)
                 } else {
-                    task.setResult(json)
+                    task.setResult(result)
                 }
                 
             }
