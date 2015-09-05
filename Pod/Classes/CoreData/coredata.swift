@@ -79,6 +79,7 @@ public class EntityDescriptor : ResponseDescriptor {
             
             if self.batchSize > 0 && index > 0 && (index % self.batchSize) == 0  {
                 i.continueWithSuccessBlock({ (task) -> AnyObject! in
+                    
                     var error: NSError?
                     self.context.performBlockAndWait { () in
                         self.context.saveToPersistentStore(&error)

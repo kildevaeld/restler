@@ -45,12 +45,12 @@ public typealias serializer = (request: NSURLRequest, response: NSHTTPURLRespons
 struct Listener : Equatable {
     var observer: AnyObject
     var event: String
-    var resource: Resource?
+    var resource: IResource?
     var handler: IEventHandler
 }
 
 func ==(lhs: Listener, rhs: Listener) -> Bool {
-    return lhs.observer === rhs.observer && lhs.event == rhs.event && lhs.resource == rhs.resource
+    return lhs.observer === rhs.observer && lhs.event == rhs.event && lhs.resource?.name == rhs.resource?.name
 }
 
 
@@ -123,7 +123,7 @@ public class Restler : NSObject {
     let mapping_queue : dispatch_queue_t = dispatch_queue_create(kRestlerMappingQueue, DISPATCH_QUEUE_CONCURRENT)
     let emitter = EventEmitter()
     
-    var resources : [Resource] = []
+    var resources : [IResource] = []
     var listeners : [Listener] = []
     
     public var baseURL: NSURL
@@ -136,7 +136,7 @@ public class Restler : NSObject {
         self.baseURL = url
     }
     
-    func request(URLRequest: URLRequestConvertible, progress: ProgressBlock?) -> BFTask {
+    func request(URLRequest: NSURLRequest, progress: ProgressBlock?, completion:((req:NSURLRequest, res:NSURLResponse?, data:NSData?, error:NSError?) -> Void)? = nil) -> BFTask {
         
         let task = BFTaskCompletionSource()
         
@@ -148,6 +148,8 @@ public class Restler : NSObject {
                 }
             }
             .response(queue: self.mapping_queue, responseSerializer: Request.dataResponseSerializer()) { (req, res, data, error) in
+                
+                completion?(req: req,res: res,data: data,error: error)
                 
                 if error != nil {
                     task.setError(error)
@@ -179,22 +181,45 @@ public class Restler : NSObject {
         
     }
     
-    public func resource(path: String, var name: String? = nil, descriptor: ResponseDescriptor? = nil) -> Resource {
+    private func findResource(name:String) -> IResource? {
+        for res in self.resources {
+            if res.name == name {
+                return res
+            }
+        }
+        return nil
+    }
+    
+    public func resource(path: String, var name: String? = nil, descriptor: ResponseDescriptor? = nil, paginated:Bool = false) -> IResource {
         if name == nil {
             name = path
         }
-        let resource = Resource(restler:self, path: path, name: name!)
+        
+        /*let resource = Resource(restler:self, path: path, name: name!)
         
         if contains(self.resources, resource) {
             return self.resources[find(self.resources,resource)!]
+        }*/
+        
+        var resource = findResource(name!)
+        
+        if resource != nil {
+            return resource!
         }
         
-        resource.on("all", handler: self.onResourceEmit)
+        if paginated == true {
+            resource = PaginatedResource(restler:self, path: path, name: name!)
+        } else {
+            resource = Resource(restler: self, path: path, name: name!)
+        }
         
-        resource.descriptor = descriptor
-        self.resources.append(resource)
         
-        return resource
+        //resource.on("all", handler: self.onResourceEmit)
+    
+        resource!.descriptor = descriptor
+        self.resources.append(resource!)
+        
+        return resource!
     }
     
     private func onResourceEmit (event: IEvent) {
@@ -226,7 +251,7 @@ public class Restler : NSObject {
     public func on(observer: AnyObject, event: Events, handler: (event: IEvent) -> Void) {
         //let splitted = split(event) { $0 == ":" }
         let listener: Listener
-        var resource: Resource?
+        var resource: IResource?
         
         if event.resourceName != nil {
             resource = self.resource(event.resourceName!)
@@ -265,7 +290,7 @@ public class Restler : NSObject {
     
     deinit {
         for resource in self.resources {
-            resource.off()
+            //resource.off()
         }
         self.emitter.off()
     }
@@ -277,9 +302,13 @@ extension Restler {
     
     public func get(resource name: String, params:Parameters? = nil, progress: ProgressBlock? = nil, complete: CompletionBlock? = nil) -> BFTask {
         let resource = self.resource(name)
-        return resource.all(params, progress:progress, complete: { (error, result) in
+        /*return resource.all(params, complete: { (error:NSError?, result:AnyObject?) -> Void in
             complete?(error: error,data: result,resource: resource)
-        })
+        })*/
+        return resource.all(params, progress:nil, complete: { (error, result) -> Void in
+            
+        });
+
     }
     
     public func get(resources: [String], progress: ProgressBlock? = nil, complete:((error:NSError?) -> Void)? = nil) -> BFTask {

@@ -99,15 +99,16 @@ class ViewController: UIViewController {
             return parameters
         }
         
-        let resource = restler.resource("/v2/concert", name:"concerts", descriptor: descriptor)
-            
-            .setOnRequest(header)
-        resource.paginated = false
-        resource.timeout = 10
+        var resource = restler.resource("/v2/concert", name:"concerts", descriptor: descriptor, paginated:true)
+        
+        resource.setOnRequest(header)
+        //resource.setOnRequest(header)
+        //resource.paginated = false
+        //resource.timeout = 10
         
         //.paginated = true
-        restler.resource("/genre", name:"genres", descriptor: genreDescriptor)
-            .setOnRequest(header)
+        //restler.resource("/genre", name:"genres", descriptor: genreDescriptor)
+            //.setOnRequest(header)
         
         var tasks : [BFTask] = []
         let timer = ParkBenchTimer()
@@ -115,20 +116,20 @@ class ViewController: UIViewController {
             println("concerts complete");
         }
         tasks.append(t)
-        t = restler.get(resource:"genres") { (e,r,rs) in
+        /*t = restler.get(resource:"genres") { (e,r,rs) in
             println("genres complete");
         }
-        tasks.append(t)
+        tasks.append(t)*/
         
-        BFTask(forCompletionOfAllTasks: tasks)
-        .continueWithBlock { (task) -> AnyObject! in
+        //BFTask(forCompletionOfAllTasks: tasks)
+        t.continueWithBlock { (task) -> AnyObject! in
             println("all done \(timer.stop())")
             return nil
         }
         
         
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+        /*dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
             println("get \(NSThread.isMainThread())")
             restler.get(resource:"concerts", progress: { (progress,written) in
                 println("\(progress)/\(written)")
@@ -138,7 +139,7 @@ class ViewController: UIViewController {
                     //println("Every thing \(result)")
             }
             
-        })
+        })*/
         
         
         // Do any additional setup after loading the view, typically from a nib.
