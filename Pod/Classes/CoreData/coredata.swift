@@ -31,7 +31,7 @@ public extension String {
 }
 
 
-public typealias ManagedResourceCompletetion = (context: NSManagedObjectContext, value: JSON, complete:ResourceCompletion) -> Void
+public typealias ManagedResourceCompletetion = (context: NSManagedObjectContext, value: JSON, error:NSErrorPointer?) -> AnyObject?
 
 public class EntityDescriptor : ResponseDescriptor {
     private let mapper: ManagedResourceCompletetion?
@@ -48,89 +48,97 @@ public class EntityDescriptor : ResponseDescriptor {
         self.mapper = map
     }
     
-    public func respond(data: AnyObject) -> BFTask {
-        let promise = BFTaskCompletionSource()
+    public func respond(data: AnyObject!, error:NSErrorPointer?) -> AnyObject? {
         
         let dict = data as? NSDictionary
         
         if dict == nil {
             Restler.log.debug("could not cast data to dictionary")
-            return BFTask(result: nil)
+            error?.memory = NSError()
+            return nil
         }
         
         let json : JSON = JSON(dict!)
+
         
-        self.mapValue(json, complete: { (error, data) -> Void in
-            if error != nil {
-                promise.setError(error!)
-            } else {
-                promise.setResult(data)
-            }
-        })
+        let result: AnyObject? = self.mapValue(json, error: error)
         
-        return promise.task
+        
+        return result
     }
     
-    public func respondArray(data: [AnyObject]) -> BFTask {
-        var out : [BFTask] = []
+    public func respondArray(data: [AnyObject], error:NSErrorPointer?) -> [AnyObject] {
+        var out : [AnyObject] = []
         var index = 0
+        var localError: NSError?
         for item in data {
-            let i = self.respond(item)
+            
+            localError = nil
+            
+            let o: AnyObject? = self.respond(item, error:&localError)
+            
+            if localError != nil {
+                if error != nil {
+                    error?.memory = localError
+                }
+                return []
+            }
             
             if self.batchSize > 0 && index > 0 && (index % self.batchSize) == 0  {
-                i.continueWithSuccessBlock({ (task) -> AnyObject! in
-                    
-                    var error: NSError?
-                    self.context.performBlockAndWait { () in
-                        self.context.saveToPersistentStore(&error)
-                    }
-                    
+                
+                /*self.context.performBlockAndWait { () in
+                    self.context.save(&localError)
+                }*/
+                
+                if localError != nil {
                     if error != nil {
-                        return BFTask(error:error!)
+                        error?.memory = localError
                     }
-                    return task
-                })
+                    
+                    return []
+                }
+                
             }
             index++
-            out.append(i)
-        }
-        
-        return BFTask(forCompletionOfAllTasksWithResults: out).continueWithSuccessBlock({ (task) -> AnyObject! in
-            var error: NSError?
-            self.context.performBlockAndWait({ () -> Void in
-                self.context.saveToPersistentStore(&error)
-            })
-            
-            if error != nil {
-                return BFTask(error: error!)
+            if o != nil {
+                 out.append(o!)
             }
-            return task
+           
+        }
+    
+        self.context.performBlockAndWait({ () -> Void in
+            self.context.save(&localError)
         })
+        
+        if localError != nil {
+            error?.memory = localError
+            return out
+        }
+        return out
     }
     
-    public func mapValue(value: JSON, complete:(error: NSError?, value: AnyObject?) -> Void) {
+    public func mapValue(value: JSON, error:NSErrorPointer?) -> AnyObject? {
         if self.mapper != nil {
             
-            /*self.context.performBlock {
-                
-            }*/
-            self.mapper!(context: self.context, value: value, complete: {(error, var result) in
-                
-                if let object = result as? NSManagedObject {
-                    result = object.objectID
-                }
-                
-                if let task = result as? BFTask {
-                    task.continueWithBlock { (t) in
-                        complete(error: t.error, value: t.result)
-                        return nil
-                    }
-                } else {
-                    complete(error: error, value: result)
-                }
+            var localError: NSError?
+            var result: AnyObject?
+            
+            self.context.performBlockAndWait({ () -> Void in
+                result = self.mapper!(context:self.context, value: value, error:&localError)
             })
+            
+            
+            if localError != nil {
+                if error != nil {
+                    error?.memory = localError
+                }
+                return nil
+            }
+            
+            return result
+            
         } else {
-            complete(error: nil, value: value.dictionaryObject)
+            return value.dictionaryObject
         }
     }
     

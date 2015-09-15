@@ -5,11 +5,11 @@ import Foundation
 import Bolts
 
 public protocol ResponseDescriptor {
-    func respond(data:AnyObject) -> BFTask
-    func respondArray(data:[AnyObject]) -> BFTask
+    func respond(data:AnyObject!, error:NSErrorPointer?) -> AnyObject?
+    func respondArray(data:[AnyObject], error:NSErrorPointer?) -> [AnyObject]
 }
 
-public typealias MapperFunc = (value: AnyObject!, complete: ResourceCompletion) -> Void
+public typealias MapperFunc = (value: AnyObject!, error:NSErrorPointer?) -> AnyObject?
 
 public class ResponseDescription : ResponseDescriptor {
   public var mapper: MapperFunc?
@@ -19,35 +19,40 @@ public class ResponseDescription : ResponseDescriptor {
   
   public init () { }
   
-  public func respond(data: AnyObject) -> BFTask {
-    let task = BFTaskCompletionSource()
-    
-    self.mapValue(data, complete: { (error, data) -> Void in
-      if error != nil {
-        task.setError(error!)
-      } else {
-        task.setResult(data)
-      }
-    })
-    
-    return task.task
+    public func respond(data: AnyObject!, error:NSErrorPointer?) -> AnyObject? {
+        
+        let result: AnyObject? = self.mapValue(data, error:error)
+        return result
   }
   
-  public func respondArray(data: [AnyObject]) -> BFTask {
-    var out : [BFTask] = []
+    public func respondArray(data: [AnyObject], error:NSErrorPointer?) -> [AnyObject] {
+    var out : [AnyObject] = []
+        var localError: NSError?
     for item in data {
-      let i = self.respond(item)
-      out.append(i)
+        localError = nil
+        let o: AnyObject? = self.respond(item, error:&localError)
+        
+        if localError != nil {
+            if error != nil {
+                error!.memory = localError
+            }
+            return []
+        }
+        
+        if o != nil {
+            out.append(o!)
+        }
+        
     }
     
-    return BFTask(forCompletionOfAllTasksWithResults: out)
+    return out
   }
   
-  public func mapValue(value: AnyObject, complete: (error: NSError?, data: AnyObject?) -> Void) {
+    public func mapValue(value: AnyObject!, error:NSErrorPointer?) -> AnyObject? {
     if self.mapper != nil {
-      self.mapper!(value: value, complete: complete)
+        return self.mapper!(value: value, error:error)
     } else {
-      complete(error: nil, data: value)
+      return value
     }
     
   }

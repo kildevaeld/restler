@@ -52,13 +52,12 @@ class ViewController: UIViewController {
         
         
         
-        let descriptor = EntityDescriptor(dstack.rootContext, map: { (context, value, complete) -> Void in
+        let descriptor = EntityDescriptor(dstack.rootContext, map: { (context, value, error) -> AnyObject? in
             
             
             
             if value["id"] == nil {
-                complete(error: nil,result: nil)
-                return
+                return nil
             }
             let concert: Concert = context.insertEntity()
             
@@ -70,17 +69,14 @@ class ViewController: UIViewController {
             concert.finish = value["finish"].doubleValue.asDate
             concert.website = value["webiste"].string
             
-            context.save(nil)
-            
-            complete(error: nil, result: concert.objectID)
+            return concert
             
         })
         
-        let genreDescriptor = EntityDescriptor(dstack.rootContext, map:{ (context, value, complete) -> Void in
+        let genreDescriptor = EntityDescriptor(dstack.rootContext, map:{ (context, value, error) -> AnyObject? in
             
             if value["id"] == nil {
-                complete(error: nil,result: nil)
-                return
+                return nil
             }
             
             let genre: Genre = context.insertEntity()
@@ -88,11 +84,8 @@ class ViewController: UIViewController {
             genre.desc = value["description"].stringValue
             genre.id = value["id"].intValue
             
-            context.save(nil)
-            
-            complete(error: nil, result: genre)
-            
-            })
+            return genre
+        })
         
         var header = { (request: NSMutableURLRequest, var parameters: Parameters) -> Parameters? in
             request.setValue("access-key", forHTTPHeaderField: "X-Access-Key")
@@ -116,13 +109,13 @@ class ViewController: UIViewController {
             println("concerts complete");
         }
         tasks.append(t)
-        /*t = restler.get(resource:"genres") { (e,r,rs) in
+        t = restler.get(resource:"genres") { (e,r,rs) in
             println("genres complete");
         }
-        tasks.append(t)*/
+        tasks.append(t)
         
-        //BFTask(forCompletionOfAllTasks: tasks)
-        t.continueWithBlock { (task) -> AnyObject! in
+        BFTask(forCompletionOfAllTasks: tasks)
+        .continueWithBlock { (task) -> AnyObject! in
             println("all done \(timer.stop())")
             return nil
         }

@@ -131,28 +131,21 @@ func synchronized<T>(obj:NSObject, fn:() -> T) -> T {
             
             let executor = BFExecutor.mainThreadExecutor()
             
-            let task: BFTask
+            let item: AnyObject?
+            var error: NSError?
             if self.descriptor != nil {
                 if let array = result.result as? [AnyObject] {
-                    
-                    task = self.descriptor!.respondArray(array)
+                    item = self.descriptor!.respondArray(array, error:&error)
                 } else {
-                    task = self.descriptor!.respond(result.result)
+                    item = self.descriptor!.respond(result.result, error:&error)
                 }
                 
                 
             } else {
-                task = result
+                item = result.result
             }
             
-            return task.continueWithExecutor(executor, block: { (t) -> AnyObject! in
-                if t.error != nil {
-                    self.emit(ResourceEvent.Error, data: result.error)
-                } else {
-                    self.emit(ResourceEvent.Request, data: t.result)
-                }
-                return t
-                }, cancellationToken: nil)
+            return item
         }
     }
     
