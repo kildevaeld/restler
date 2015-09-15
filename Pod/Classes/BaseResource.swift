@@ -12,6 +12,7 @@ import Alamofire
 
 public protocol IResource {
     var name: String { get }
+    var timeout: Double { get set }
     var descriptor: ResponseDescriptor? { get set }
     func all(parameters:Parameters?, progress:ProgressBlock?, complete: ResourceCompletion?) -> BFTask
     func setOnRequest (fn: (request: NSMutableURLRequest, parameters: Parameters) -> Parameters?)

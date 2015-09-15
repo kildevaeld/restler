@@ -10,7 +10,7 @@ import Foundation
 import Bolts
 import Alamofire
 
-public class PaginatedResource : BaseResource {
+@objc public class PaginatedResource : BaseResource {
     var pagination_queue = dispatch_queue_create("com.softshag.restler.pagination", DISPATCH_QUEUE_SERIAL)
     public var onPaginateBlock: ((parameters: Parameters, page: Int) -> Parameters)?
     
@@ -23,7 +23,7 @@ public class PaginatedResource : BaseResource {
     public override func request (request: NSURLRequest, progress: ProgressBlock?, completion:((req:NSURLRequest, res:NSURLResponse?, data:NSData?, error:NSError?) -> Void)? = nil) -> BFTask {
         
         if !should_update() {
-            Restler.log.debug("\(self.name): only \(get_diff()) since last update. interval is: \(self.timeout)")
+            Restler.log.debug("\(self.name): only \(self.get_diff()) since last update. interval is: \(self.timeout)")
             return BFTask(result: nil)
         }
         

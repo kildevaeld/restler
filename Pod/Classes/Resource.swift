@@ -21,7 +21,7 @@ import Alamofire
         
      
         if !should_update() {
-            Restler.log.debug("\(self.name): only \(get_diff()) since last update. interval is: \(self.timeout)")
+            Restler.log.debug("\(self.name): only \(self.get_diff()) since last update. interval is: \(self.timeout)")
             return BFTask(result: nil)
         }
         

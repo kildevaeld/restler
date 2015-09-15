@@ -37,7 +37,7 @@ public class EntityDescriptor : ResponseDescriptor {
     private let mapper: ManagedResourceCompletetion?
     
     public let context: NSManagedObjectContext
-    public var batchSize = 100
+    public var batchSize = 500
     public init (context: NSManagedObjectContext) {
         self.context = context
         self.mapper = nil
@@ -84,6 +84,7 @@ public class EntityDescriptor : ResponseDescriptor {
                     self.context.performBlockAndWait { () in
                         self.context.saveToPersistentStore(&error)
                     }
+                    
                     if error != nil {
                         return BFTask(error:error!)
                     }
@@ -100,7 +101,6 @@ public class EntityDescriptor : ResponseDescriptor {
                 self.context.saveToPersistentStore(&error)
             })
             
-            
             if error != nil {
                 return BFTask(error: error!)
             }
@@ -111,23 +111,24 @@ public class EntityDescriptor : ResponseDescriptor {
     public func mapValue(value: JSON, complete:(error: NSError?, value: AnyObject?) -> Void) {
         if self.mapper != nil {
             
-            self.context.performBlock {
-                self.mapper!(context: self.context, value: value, complete: {(error, var result) in
-                    
-                    if let object = result as? NSManagedObject {
-                        result = object.objectID
-                    }
+            /*self.context.performBlock {
                 
-                    if let task = result as? BFTask {
-                        task.continueWithBlock { (t) in
-                            complete(error: t.error, value: t.result)
-                            return nil
-                        }
-                    } else {
-                        complete(error: error, value: result)
+            }*/
+            self.mapper!(context: self.context, value: value, complete: {(error, var result) in
+                
+                if let object = result as? NSManagedObject {
+                    result = object.objectID
+                }
+                
+                if let task = result as? BFTask {
+                    task.continueWithBlock { (t) in
+                        complete(error: t.error, value: t.result)
+                        return nil
                     }
-                })
-            }
+                } else {
+                    complete(error: error, value: result)
+                }
+            })
         } else {
             complete(error: nil, value: value.dictionaryObject)
         }
