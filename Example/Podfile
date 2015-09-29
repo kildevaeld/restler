@@ -4,16 +4,16 @@ use_frameworks!
 target 'Restler_Example', :exclusive => true do
   pod "Restler", :path => "../"
   pod "Restler/CoreData", :path => "../"
-  pod "DStack", :path => "../../FACoreData"
+  pod "DStack", :path => "../../DStack"
 end
 
 target 'Restler_Tests', :exclusive => true do
   pod "Restler", :path => "../"
   pod "Restler/CoreData", :path => "../"
-  pod "DStack", :path => "../../FACoreData"
+  pod "DStack", :path => "../../DStack"
   
-  pod 'Quick', '~> 0.3.1'
-  pod 'Nimble'
-  pod 'FBSnapshotTestCase'
-  pod 'Nimble-Snapshots'
+  #pod 'Quick', '~> 0.6.0'
+  #pod 'Nimble', '2.0.0-rc.3'
+  #pod 'FBSnapshotTestCase'
+  #pod 'Nimble-Snapshots'
 end

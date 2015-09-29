@@ -129,7 +129,7 @@ extension String : EventConvertible {
 }
 
 
-public class EventEmitter {
+public class EventEmitter: NSObject {
     var handlers : [IEventHandler] = []
     public var emitQueue : dispatch_queue_t?
     

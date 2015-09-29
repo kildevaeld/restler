@@ -52,7 +52,7 @@ class ViewController: UIViewController {
         
         
         
-        let descriptor = EntityDescriptor(dstack.rootContext, map: { (context, value, error) -> AnyObject? in
+        let descriptor = EntityDescriptor(dstack.rootContext, map: { (context, value) -> AnyObject? in
             
             
             
@@ -73,7 +73,7 @@ class ViewController: UIViewController {
             
         })
         
-        let genreDescriptor = EntityDescriptor(dstack.rootContext, map:{ (context, value, error) -> AnyObject? in
+        let genreDescriptor = EntityDescriptor(dstack.rootContext, map:{ (context, value) -> AnyObject? in
             
             if value["id"] == nil {
                 return nil
@@ -87,12 +87,12 @@ class ViewController: UIViewController {
             return genre
         })
         
-        var header = { (request: NSMutableURLRequest, var parameters: Parameters) -> Parameters? in
+        let header = { (request: NSMutableURLRequest, parameters: Parameters) -> Parameters? in
             request.setValue("access-key", forHTTPHeaderField: "X-Access-Key")
             return parameters
         }
         
-        var resource = restler.resource("/v2/concert", name:"concerts", descriptor: descriptor, paginated:true)
+        let resource = restler.resource("/v2/concert", name:"concerts", descriptor: descriptor, paginated:true)
         
         resource.setOnRequest(header)
         //resource.setOnRequest(header)
@@ -106,17 +106,17 @@ class ViewController: UIViewController {
         var tasks : [BFTask] = []
         let timer = ParkBenchTimer()
         var t = restler.get(resource:"concerts", progress:nil) { (e,r,rs) in
-            println("concerts complete");
+            print("concerts complete");
         }
         tasks.append(t)
         t = restler.get(resource:"genres") { (e,r,rs) in
-            println("genres complete");
+            print("genres complete");
         }
         tasks.append(t)
         
         BFTask(forCompletionOfAllTasks: tasks)
         .continueWithBlock { (task) -> AnyObject! in
-            println("all done \(timer.stop())")
+            print("all done \(timer.stop())")
             return nil
         }
         

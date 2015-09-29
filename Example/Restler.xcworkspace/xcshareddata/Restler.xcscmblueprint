@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "12C32D340701357701A25960B1A0E323CA94FA3C",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "E5219B05DC39633140E29E670A82D3ED493936C7" : 0,
+    "12C32D340701357701A25960B1A0E323CA94FA3C" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "037B91D3-9FFB-4B7C-A618-C7355EF2EDA6",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "E5219B05DC39633140E29E670A82D3ED493936C7" : "FACoreData",
+    "12C32D340701357701A25960B1A0E323CA94FA3C" : "Restler"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Restler",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Example\/Restler.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/kildevaeld\/restler.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "12C32D340701357701A25960B1A0E323CA94FA3C"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/kildevaeld\/DStack.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "E5219B05DC39633140E29E670A82D3ED493936C7"
+    }
+  ]
+}

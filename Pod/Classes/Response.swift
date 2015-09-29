@@ -5,11 +5,11 @@ import Foundation
 import Bolts
 
 public protocol ResponseDescriptor {
-    func respond(data:AnyObject!, error:NSErrorPointer?) -> AnyObject?
-    func respondArray(data:[AnyObject], error:NSErrorPointer?) -> [AnyObject]
+    func respond(data:AnyObject!) throws -> AnyObject?
+    func respondArray(data:[AnyObject]) throws -> [AnyObject]
 }
 
-public typealias MapperFunc = (value: AnyObject!, error:NSErrorPointer?) -> AnyObject?
+public typealias MapperFunc = (value: AnyObject!) throws -> AnyObject?
 
 public class ResponseDescription : ResponseDescriptor {
   public var mapper: MapperFunc?
@@ -19,25 +19,18 @@ public class ResponseDescription : ResponseDescriptor {
   
   public init () { }
   
-    public func respond(data: AnyObject!, error:NSErrorPointer?) -> AnyObject? {
+    public func respond(data: AnyObject!) throws -> AnyObject? {
         
-        let result: AnyObject? = self.mapValue(data, error:error)
+        let result: AnyObject? = try self.mapValue(data)
         return result
   }
   
-    public func respondArray(data: [AnyObject], error:NSErrorPointer?) -> [AnyObject] {
+    public func respondArray(data: [AnyObject]) throws -> [AnyObject] {
     var out : [AnyObject] = []
-        var localError: NSError?
-    for item in data {
-        localError = nil
-        let o: AnyObject? = self.respond(item, error:&localError)
         
-        if localError != nil {
-            if error != nil {
-                error!.memory = localError
-            }
-            return []
-        }
+    for item in data {
+    
+        let o: AnyObject? = try self.respond(item)
         
         if o != nil {
             out.append(o!)
@@ -48,9 +41,9 @@ public class ResponseDescription : ResponseDescriptor {
     return out
   }
   
-    public func mapValue(value: AnyObject!, error:NSErrorPointer?) -> AnyObject? {
+    public func mapValue(value: AnyObject!) throws -> AnyObject? {
     if self.mapper != nil {
-        return self.mapper!(value: value, error:error)
+        return try self.mapper!(value: value)
     } else {
       return value
     }

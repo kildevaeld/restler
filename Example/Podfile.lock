@@ -1,14 +1,7 @@
 PODS:
-  - Alamofire (1.3.1)
-  - Bolts/Tasks (1.2.1)
+  - Alamofire (2.0.2)
+  - Bolts/Tasks (1.3.0)
   - DStack (0.1.0)
-  - FBSnapshotTestCase (1.8.1)
-  - Nimble (0.4.2)
-  - Nimble-Snapshots (0.4.0):
-    - FBSnapshotTestCase (~> 1.7)
-    - Nimble (~> 0.4)
-    - Quick (~> 0.3)
-  - Quick (0.3.1)
   - Restler (0.0.1):
     - Alamofire
     - Bolts/Tasks
@@ -24,34 +17,26 @@ PODS:
     - DStack
     - SwiftyJSON
     - XCGLogger
-  - SwiftyJSON (2.2.1)
-  - XCGLogger (2.3)
+  - SwiftyJSON (2.3.0)
+  - XCGLogger (3.0)
 
 DEPENDENCIES:
-  - DStack (from `../../FACoreData`)
-  - FBSnapshotTestCase
-  - Nimble
-  - Nimble-Snapshots
-  - Quick (~> 0.3.1)
+  - DStack (from `../../DStack`)
   - Restler (from `../`)
   - Restler/CoreData (from `../`)
 
 EXTERNAL SOURCES:
   DStack:
-    :path: "../../FACoreData"
+    :path: "../../DStack"
   Restler:
     :path: "../"
 
 SPEC CHECKSUMS:
-  Alamofire: e4ab637e3195b645c814b87a652373439e59f2a4
-  Bolts: 7686a5cb204d1ac54cee26f12d9b7622db3f80d1
+  Alamofire: 8edbab00802a752bb5240cc2abe70e7e881488ad
+  Bolts: 805a4a87413e49d4a0c2b7d469084cbc46b09342
   DStack: 10d56ec698423ef2c86c3fb1506f58dfa379a09f
-  FBSnapshotTestCase: 3dc3899168747a0319c5278f5b3445c13a6532dd
-  Nimble: 49b7a7da8919f42823d37c6d68cc6d15a7009f32
-  Nimble-Snapshots: 216ae8c0ea3f4105be1606749fe15d8b2138af40
-  Quick: 824572d3d198d51e52cf4aa722cebf7e59952a35
   Restler: a8ce33b4c84ca7bfa763921b23e9cd89f5a53483
-  SwiftyJSON: ae2d0a3d68025d136602a33c4ee215091ced3e33
-  XCGLogger: a1d7b20405e369aa5c139221569cd080494b2469
+  SwiftyJSON: 8d6b61a70277ef2a5d710d372e06e7e2d87fb9e4
+  XCGLogger: 5802533aff8bafc8b3b9776ab8972576f31d0a4e
 
 COCOAPODS: 0.39.0.beta.4

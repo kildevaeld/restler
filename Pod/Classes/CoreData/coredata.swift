@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Restler
+//import Restler
 import CoreData
 import DStack
 import Bolts
@@ -30,8 +30,13 @@ public extension String {
     }
 }
 
+public enum RestlerError : ErrorType {
+    case Cast
+    case Error(String)
+}
 
-public typealias ManagedResourceCompletetion = (context: NSManagedObjectContext, value: JSON, error:NSErrorPointer?) -> AnyObject?
+
+public typealias ManagedResourceCompletetion = (context: NSManagedObjectContext, value: JSON) throws -> AnyObject?
 
 public class EntityDescriptor : ResponseDescriptor {
     private let mapper: ManagedResourceCompletetion?
@@ -48,56 +53,44 @@ public class EntityDescriptor : ResponseDescriptor {
         self.mapper = map
     }
     
-    public func respond(data: AnyObject!, error:NSErrorPointer?) -> AnyObject? {
+    public func respond(data: AnyObject!) throws -> AnyObject? {
         
         let dict = data as? NSDictionary
         
         if dict == nil {
             Restler.log.debug("could not cast data to dictionary")
-            error?.memory = NSError()
+            throw RestlerError.Cast
             return nil
         }
         
         let json : JSON = JSON(dict!)
 
         
-        let result: AnyObject? = self.mapValue(json, error: error)
+        let result: AnyObject? = try self.mapValue(json)
         
         
         return result
     }
     
-    public func respondArray(data: [AnyObject], error:NSErrorPointer?) -> [AnyObject] {
+    public func respondArray(data: [AnyObject]) throws -> [AnyObject] {
         var out : [AnyObject] = []
         var index = 0
-        var localError: NSError?
+        //var localError: NSError?
         for item in data {
             
-            localError = nil
+            //localError = nil
             
-            let o: AnyObject? = self.respond(item, error:&localError)
             
-            if localError != nil {
-                if error != nil {
-                    error?.memory = localError
-                }
-                return []
-            }
+            let o: AnyObject? = try self.respond(item)
+            
+            
             
             if self.batchSize > 0 && index > 0 && (index % self.batchSize) == 0  {
                 
                 /*self.context.performBlockAndWait { () in
                     self.context.save(&localError)
                 }*/
-                
-                if localError != nil {
-                    if error != nil {
-                        error?.memory = localError
-                    }
-                    
-                    return []
-                }
-                
+            
             }
             index++
             if o != nil {
@@ -105,34 +98,34 @@ public class EntityDescriptor : ResponseDescriptor {
             }
            
         }
-    
-        self.context.performBlockAndWait({ () -> Void in
-            self.context.save(&localError)
+        
+        self.context.performBlockAndWait({ () ->  Void in
+            do {
+                try self.context.save()
+            } catch { }
         })
         
-        if localError != nil {
-            error?.memory = localError
-            return out
-        }
+        
         return out
     }
     
-    public func mapValue(value: JSON, error:NSErrorPointer?) -> AnyObject? {
+    public func mapValue(value: JSON) throws -> AnyObject? {
         if self.mapper != nil {
             
             var localError: NSError?
             var result: AnyObject?
             
             self.context.performBlockAndWait({ () -> Void in
-                result = self.mapper!(context:self.context, value: value, error:&localError)
+                do {
+                    result = try self.mapper!(context:self.context, value: value)
+                } catch let e as NSError {
+                    localError = e
+                }
+                
             })
             
-            
             if localError != nil {
-                if error != nil {
-                    error?.memory = localError
-                }
-                return nil
+                throw localError!
             }
             
             return result

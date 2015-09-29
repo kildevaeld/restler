@@ -22,7 +22,7 @@ func dispatch_main(fn:() -> Void) {
 public typealias ProgressBlock = (progress: Int64, total: Int64) -> Void
 public typealias CompletionBlock = (error: NSError?, data: AnyObject?, resource: Resource) -> Void
 
-public typealias serializer = (request: NSURLRequest, response: NSHTTPURLResponse?, data: NSData?) -> (AnyObject?, NSError?)
+public typealias serializer = (data:NSData) throws -> AnyObject
 
 
 //func get_serializer(mime: String?) -> ResponseSerializer? {
@@ -109,12 +109,17 @@ public enum Events : EventConvertible {
 }
 
 public class Restler : NSObject {
-    public static var serializers: Dictionary<String,() -> serializer> = [
-        "application/json": { Alamofire.Request.JSONResponseSerializer(options: nil).serializeResponse },
-        "application/plist": {Alamofire.Request.propertyListResponseSerializer().serializeResponse }]
+    
+    public static var serializers: Dictionary<String, serializer> = [
+        "application/json": { (data) throws ->  AnyObject in
+            let JSON = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+            return JSON
+        }]
+        //"application/plist": {Alamofire.Request.propertyListResponseSerializer().serializeResponse }]
     static var log: XCGLogger {
         let log = XCGLogger()
-        log.setup(logLevel: .Debug, showThreadName: false, showLogLevel: true, showFileNames: false, showLineNumbers: false, writeToFile: nil, fileLogLevel: nil)
+        
+        log.setup(.Debug, showThreadName: false, showLogLevel: true, showFileNames: false, showLineNumbers: false, writeToFile: nil, fileLogLevel: nil)
         
         return log
     }
@@ -136,11 +141,49 @@ public class Restler : NSObject {
         self.baseURL = url
     }
     
-    func request(URLRequest: NSURLRequest, progress: ProgressBlock?, completion:((req:NSURLRequest, res:NSURLResponse?, data:NSData?, error:NSError?) -> Void)? = nil) -> BFTask {
+    func request(URLRequest: NSURLRequest, progress: ProgressBlock?, completion:((req:NSURLRequest, res:NSHTTPURLResponse?, data:NSData?, error:NSError?) -> Void)? = nil) -> BFTask {
         
         let task = BFTaskCompletionSource()
         
-        let req = self.manager.request(URLRequest)
+        self.manager.request(.GET, URLRequest)
+        .validate()
+        .progress { (written, totalWritten, totalExpected) -> Void in
+            if progress != nil {
+                dispatch_main {
+                    progress!(progress: totalWritten, total: totalExpected)
+                }
+            }
+        }
+        .response(queue: self.mapping_queue, responseSerializer: Request.dataResponseSerializer()) { (req, res, result) -> Void in
+            if result.isFailure {
+                task.setError(result.error as! NSError)
+            } else {
+                if (res?.MIMEType == nil) {
+                    task.setResult(result.data)
+                    return
+                }
+                let serializer = Restler.serializers[res!.MIMEType!]
+                
+                if serializer == nil || result.data == nil {
+                    task.setResult(result.data)
+                    return
+                }
+                
+                do {
+                    let result = try serializer!(data: result.data!)
+                    task.setResult(result)
+                } catch let e as NSError {
+                    task.setError(e)
+                }
+
+            }
+        }
+        /*.response(queue: self.mapping_queue) { (req, res, data, error) -> Void in
+            
+            //completion?(req,res,data,error)
+        
+        }*/
+        /*let req = self.manager.request(URLRequest)
             .validate()
             .progress { (written, totalWritten, totalExpected) -> Void in
                 dispatch_main {
@@ -175,7 +218,7 @@ public class Restler : NSObject {
                     task.setResult(result)
                 }
                 
-            }
+            }*/
         
         return task.task
         
@@ -272,7 +315,7 @@ public class Restler : NSObject {
         for listener in lis {
             if listener.event == event.eventName && listener.observer === observer {
                 self.emitter.off(listener.handler)
-                self.listeners.removeAtIndex(find(self.listeners, listener)!)
+                self.listeners.removeAtIndex(self.listeners.indexOf(listener)!)
             }
         }
     }
@@ -283,13 +326,13 @@ public class Restler : NSObject {
         for listener in lis {
             if listener.observer === observer {
                 self.emitter.off(listener.handler)
-                self.listeners.removeAtIndex(find(self.listeners, listener)!)
+                self.listeners.removeAtIndex(self.listeners.indexOf(listener)!)
             }
         }
     }
     
     deinit {
-        for resource in self.resources {
+        for _ in self.resources {
             //resource.off()
         }
         self.emitter.off()

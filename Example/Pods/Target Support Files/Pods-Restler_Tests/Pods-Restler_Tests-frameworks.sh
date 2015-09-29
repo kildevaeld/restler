@@ -88,10 +88,6 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "Pods-Restler_Tests/Restler.framework"
   install_framework "Pods-Restler_Tests/SwiftyJSON.framework"
   install_framework "Pods-Restler_Tests/XCGLogger.framework"
-  install_framework "Pods-Restler_Tests/FBSnapshotTestCase.framework"
-  install_framework "Pods-Restler_Tests/Nimble.framework"
-  install_framework "Pods-Restler_Tests/Nimble_Snapshots.framework"
-  install_framework "Pods-Restler_Tests/Quick.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "Pods-Restler_Tests/Alamofire.framework"
@@ -100,8 +96,4 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "Pods-Restler_Tests/Restler.framework"
   install_framework "Pods-Restler_Tests/SwiftyJSON.framework"
   install_framework "Pods-Restler_Tests/XCGLogger.framework"
-  install_framework "Pods-Restler_Tests/FBSnapshotTestCase.framework"
-  install_framework "Pods-Restler_Tests/Nimble.framework"
-  install_framework "Pods-Restler_Tests/Nimble_Snapshots.framework"
-  install_framework "Pods-Restler_Tests/Quick.framework"
 fi

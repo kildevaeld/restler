@@ -64,16 +64,16 @@ func synchronized<T>(obj:NSObject, fn:() -> T) -> T {
 }
 
 
-@objc public class BaseResource: EventEmitter, IResource, Equatable {
+public class BaseResource: EventEmitter, IResource {
     private let _lock = NSObject();
     let restler: Restler
     
     private var _lastUpdate: NSDate?
     public var lastUpdate: NSDate? {
         get {
-            return synchronized(_lock, { () -> NSDate? in
+            return synchronized(_lock) { () -> NSDate? in
                 return self._lastUpdate
-            })
+            }
         }
         set (value) {
             synchronized(_lock) {
@@ -129,17 +129,23 @@ func synchronized<T>(obj:NSObject, fn:() -> T) -> T {
                 return task
             }
             
-            let executor = BFExecutor.mainThreadExecutor()
+            //let executor = BFExecutor.mainThreadExecutor()
             
             let item: AnyObject?
-            var error: NSError?
+            //var error: NSError?
             if self.descriptor != nil {
-                if let array = result.result as? [AnyObject] {
-                    item = self.descriptor!.respondArray(array, error:&error)
-                } else {
-                    item = self.descriptor!.respond(result.result, error:&error)
-                }
                 
+                do {
+                    
+                    if let array = result.result as? [AnyObject] {
+                        item = try self.descriptor!.respondArray(array)
+                    } else {
+                        item = try self.descriptor!.respond(result.result)
+                    }
+                    
+                } catch let e as NSError {
+                    return BFTask(error: e)
+                }
                 
             } else {
                 item = result.result
@@ -151,7 +157,7 @@ func synchronized<T>(obj:NSObject, fn:() -> T) -> T {
     
     public func request (path: String, parameters: Parameters?, method: Alamofire.Method = .GET, progress: ProgressBlock? = nil) -> BFTask {
         
-        let (error, request, params) = self.getRequest(method: method, path: path, parameters: parameters)
+        let (error, request, _) = self.getRequest(method, path: path, parameters: parameters)
         
         
         
@@ -176,7 +182,7 @@ func synchronized<T>(obj:NSObject, fn:() -> T) -> T {
         }
         
         if parameters != nil {
-            extendParameters(&params, parameters!)
+            extendParameters(&params, param2:parameters!)
         }
         
         if self.onRequestBlock != nil {
@@ -245,7 +251,7 @@ extension BaseResource {
     }
     
     public func get(id: String, complete: ResourceCompletion) {
-        let path = self.path.stringByAppendingPathComponent(id)
+        let path = (self.path as NSString).stringByAppendingPathComponent(id)
         self.request(path, parameters: nil)
             .continueWithBlock { (task) -> AnyObject! in
                 complete(error: task.error, result: task.result)
