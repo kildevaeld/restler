@@ -83,16 +83,16 @@ strip_invalid_archs() {
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "Pods-Restler_Tests/Alamofire.framework"
-  install_framework "Pods-Restler_Tests/Bolts.framework"
   install_framework "Pods-Restler_Tests/DStack.framework"
+  install_framework "Pods-Restler_Tests/Promissum.framework"
   install_framework "Pods-Restler_Tests/Restler.framework"
   install_framework "Pods-Restler_Tests/SwiftyJSON.framework"
   install_framework "Pods-Restler_Tests/XCGLogger.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "Pods-Restler_Tests/Alamofire.framework"
-  install_framework "Pods-Restler_Tests/Bolts.framework"
   install_framework "Pods-Restler_Tests/DStack.framework"
+  install_framework "Pods-Restler_Tests/Promissum.framework"
   install_framework "Pods-Restler_Tests/Restler.framework"
   install_framework "Pods-Restler_Tests/SwiftyJSON.framework"
   install_framework "Pods-Restler_Tests/XCGLogger.framework"

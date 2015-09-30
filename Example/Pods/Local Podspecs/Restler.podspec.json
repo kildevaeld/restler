@@ -18,14 +18,20 @@
   "requires_arc": true,
   "default_subspecs": "Core",
   "dependencies": {
-    "Bolts/Tasks": [
-
-    ],
     "Alamofire": [
 
     ],
     "XCGLogger": [
-
+      "~> 3.0"
+    ],
+    "Promissum": [
+      "~> 0.3.0"
+    ],
+    "Promissum/Alamofire": [
+      "~> 0.3.0"
+    ],
+    "SwiftyJSON": [
+      "~> 2.3.0"
     ]
   },
   "subspecs": [
@@ -39,9 +45,6 @@
       "frameworks": "CoreData",
       "dependencies": {
         "DStack": [
-
-        ],
-        "SwiftyJSON": [
 
         ]
       }

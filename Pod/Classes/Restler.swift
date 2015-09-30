@@ -8,41 +8,20 @@
 
 import Foundation
 import Alamofire
-import Bolts
+//import Bolts
+import Promissum
 import XCGLogger
-
 let sessionIdentifier = "com.softshag.restler"
 var kRestlerMappingQueue = "com.softshag.restler.mapping_queue"
 
-func dispatch_main(fn:() -> Void) {
-    dispatch_async(dispatch_get_main_queue(), fn)
-}
-
 
 public typealias ProgressBlock = (progress: Int64, total: Int64) -> Void
-public typealias CompletionBlock = (error: NSError?, data: AnyObject?, resource: Resource) -> Void
+public typealias CompletionBlock = (error: NSError?, data: AnyObject?, resource: IResource) -> Void
 
 public typealias serializer = (data:NSData) throws -> AnyObject
 
 
-//func get_serializer(mime: String?) -> ResponseSerializer? {
-//    if mime == nil {
-//        return nil
-//    }
-//    switch mime! {
-//    case "application/json":
-//        return Alamofire.Request.JSONResponseSerializer().serializeResponse
-//    case "application/plist", "application/x-plist":
-//        return Alamofire.Request.propertyListResponseSerializer().serializeResponse
-//    default:
-//        if Restler.serializers[mime!] != nil {
-//            return Restler.serializers[mime!]
-//        }
-//        return nil
-//    }
-//}
-
-struct Listener : Equatable {
+/*struct Listener : Equatable {
     var observer: AnyObject
     var event: String
     var resource: IResource?
@@ -106,7 +85,7 @@ public enum Events : EventConvertible {
         
         return resource
     }
-}
+}*/
 
 public class Restler : NSObject {
     
@@ -129,7 +108,7 @@ public class Restler : NSObject {
     let emitter = EventEmitter()
     
     var resources : [IResource] = []
-    var listeners : [Listener] = []
+    //var listeners : [Listener] = []
     
     public var baseURL: NSURL
     
@@ -141,9 +120,10 @@ public class Restler : NSObject {
         self.baseURL = url
     }
     
-    func request(URLRequest: NSURLRequest, progress: ProgressBlock?, completion:((req:NSURLRequest, res:NSHTTPURLResponse?, data:NSData?, error:NSError?) -> Void)? = nil) -> BFTask {
+    func request(URLRequest: NSURLRequest, progress: ProgressBlock?, completion:(req:NSURLRequest?, res:NSHTTPURLResponse?, data:AnyObject?, error:ErrorType?) -> Void) {
         
-        let task = BFTaskCompletionSource()
+        self.manager.request(.GET, URLRequest)
+        .validate()
         
         self.manager.request(.GET, URLRequest)
         .validate()
@@ -154,73 +134,32 @@ public class Restler : NSObject {
                 }
             }
         }
+        
         .response(queue: self.mapping_queue, responseSerializer: Request.dataResponseSerializer()) { (req, res, result) -> Void in
+            var error: ErrorType? = nil
+            var out: AnyObject? = nil
             if result.isFailure {
-                task.setError(result.error as! NSError)
+                error = result.error
+            } else if res?.MIMEType == nil {
+               out = result.value
             } else {
-                if (res?.MIMEType == nil) {
-                    task.setResult(result.data)
-                    return
-                }
                 let serializer = Restler.serializers[res!.MIMEType!]
                 
-                if serializer == nil || result.data == nil {
-                    task.setResult(result.data)
-                    return
-                }
-                
-                do {
-                    let result = try serializer!(data: result.data!)
-                    task.setResult(result)
-                } catch let e as NSError {
-                    task.setError(e)
-                }
-
-            }
-        }
-        /*.response(queue: self.mapping_queue) { (req, res, data, error) -> Void in
-            
-            //completion?(req,res,data,error)
-        
-        }*/
-        /*let req = self.manager.request(URLRequest)
-            .validate()
-            .progress { (written, totalWritten, totalExpected) -> Void in
-                dispatch_main {
-                    progress?(progress: totalWritten, total: totalExpected)
-                }
-            }
-            .response(queue: self.mapping_queue, responseSerializer: Request.dataResponseSerializer()) { (req, res, data, error) in
-                
-                completion?(req: req,res: res,data: data,error: error)
-                
-                if error != nil {
-                    task.setError(error)
-                    return
-                }
-                
-                if (res?.MIMEType == nil) {
-                    task.setResult(data)
-                    return
-                }
-                let serializer = Restler.serializers[res!.MIMEType!]
-                
-                if serializer == nil {
-                    task.setResult(data)
-                    return
-                }
-                
-                let (result: AnyObject?, error) = serializer!()(request: req,response: res,data: data)
-                
-                if error != nil {
-                    task.setError(error)
+                if serializer == nil || result.value == nil {
+                    out = result.value
+                    
                 } else {
-                    task.setResult(result)
+                    do {
+                        let result = try serializer!(data: result.value!)
+                        out = result
+                    } catch let e as NSError {
+                        error = e
+                    }
                 }
-                
-            }*/
-        
-        return task.task
+            }
+            
+            completion(req: req,res: res,data: out,error: error)
+        }
         
     }
     
@@ -233,7 +172,18 @@ public class Restler : NSObject {
         return nil
     }
     
-    public func resource(path: String, var name: String? = nil, descriptor: ResponseDescriptor? = nil, paginated:Bool = false) -> IResource {
+    /*public func findResource<U>(type:U.Type) -> IResource? {
+        for res in self.resources {
+            if let r = res as? BaseResource<ResponseDescription<U>,U> {
+                if r.descriptor.dynamicType.ReturnType.self == type {
+                    return r
+                }
+            }
+        }
+        return nil
+    }*/
+    
+    public func resource<T : ResponseDescriptor>(path: String, var name: String? = nil, descriptor: T, paginated:Bool = false) -> Resource<T> {
         if name == nil {
             name = path
         }
@@ -244,28 +194,25 @@ public class Restler : NSObject {
             return self.resources[find(self.resources,resource)!]
         }*/
         
-        var resource = findResource(name!)
+        var resource = findResource(name!) as? Resource<T>
         
         if resource != nil {
             return resource!
         }
         
         if paginated == true {
-            resource = PaginatedResource(restler:self, path: path, name: name!)
+            //resource = PaginatedResource(restler:self, path: path, name: name!, descriptor)
         } else {
-            resource = Resource(restler: self, path: path, name: name!)
+            resource = Resource(restler: self, name: name!,path: path, descriptor: descriptor)
         }
-        
-        
-        //resource.on("all", handler: self.onResourceEmit)
     
-        resource!.descriptor = descriptor
+        //resource!.descriptor = descriptor
         self.resources.append(resource!)
         
         return resource!
     }
     
-    private func onResourceEmit (event: IEvent) {
+    /*private func onResourceEmit (event: IEvent) {
         let sender = event.sender as! Resource
         
         let ev = sender.name + ":" + event.name
@@ -274,25 +221,9 @@ public class Restler : NSObject {
         self.emitter.emit(event.name, data: event as? AnyObject)
     }
     
-    /*public func on<T: IEvent>(observer: AnyObject, event: String, handler: (event: T) -> Void) {
-    let splitted = split(event) { $0 == ":" }
-    let listener: Listener
-    var resource: Resource?
-    
-    if splitted.count >= 2 {
-    resource = self.resource(splitted[0])
-    }
-    
-    
-    let ehandler = self.emitter.on(event, handler: handler)
-    
-    listener = Listener(observer: observer, event: event, resource: resource, handler: ehandler)
-    
-    self.listeners.append(listener)
-    }*/
     
     public func on(observer: AnyObject, event: Events, handler: (event: IEvent) -> Void) {
-        //let splitted = split(event) { $0 == ":" }
+        
         let listener: Listener
         var resource: IResource?
         
@@ -307,8 +238,8 @@ public class Restler : NSObject {
         
         self.listeners.append(listener)
         
-    }
-    
+    }*/
+    /*
     public func off(observer: AnyObject?, event: Events) {
         let lis = self.listeners
         
@@ -336,12 +267,12 @@ public class Restler : NSObject {
             //resource.off()
         }
         self.emitter.off()
-    }
+    }*/
 }
 
 
 // MARK: - Convience
-extension Restler {
+/*extension Restler {
     
     public func get(resource name: String, params:Parameters? = nil, progress: ProgressBlock? = nil, complete: CompletionBlock? = nil) -> BFTask {
         let resource = self.resource(name)
@@ -349,7 +280,7 @@ extension Restler {
             complete?(error: error,data: result,resource: resource)
         })*/
         return resource.all(params, progress:nil, complete: { (error, result) -> Void in
-            
+            //complete?(error: error, data: <#T##AnyObject?#>, resource: <#T##Resource#>)
         });
 
     }
@@ -373,4 +304,4 @@ extension Restler {
         }
         
     }
-}
+}*/

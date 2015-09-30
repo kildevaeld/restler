@@ -7,10 +7,8 @@
 //
 
 import Foundation
-//import Restler
 import CoreData
 import DStack
-import Bolts
 import SwiftyJSON
 
 
@@ -38,8 +36,8 @@ public enum RestlerError : ErrorType {
 
 public typealias ManagedResourceCompletetion = (context: NSManagedObjectContext, value: JSON) throws -> AnyObject?
 
-public class EntityDescriptor : ResponseDescriptor {
-    private let mapper: ManagedResourceCompletetion?
+public class EntityDescriptor<T> : ResponseDescriptor {
+    private let mapper: ((context: NSManagedObjectContext, value: JSON) throws -> T?)?
     
     public let context: NSManagedObjectContext
     public var batchSize = 500
@@ -48,32 +46,30 @@ public class EntityDescriptor : ResponseDescriptor {
         self.mapper = nil
     }
     
-    public init(_ context: NSManagedObjectContext, map: ManagedResourceCompletetion) {
+    public init(_ context: NSManagedObjectContext, map: (context: NSManagedObjectContext, value: JSON) throws -> T?) {
         self.context = context
         self.mapper = map
     }
     
-    public func respond(data: AnyObject!) throws -> AnyObject? {
+    public func respond(data: AnyObject!) throws -> T? {
         
         let dict = data as? NSDictionary
         
         if dict == nil {
             Restler.log.debug("could not cast data to dictionary")
             throw RestlerError.Cast
-            return nil
         }
         
         let json : JSON = JSON(dict!)
 
         
-        let result: AnyObject? = try self.mapValue(json)
-        
+        let result = try self.mapValue(json)
         
         return result
     }
     
-    public func respondArray(data: [AnyObject]) throws -> [AnyObject] {
-        var out : [AnyObject] = []
+    public func respondArray(data: [AnyObject]) throws -> [T] {
+        var out : [T] = []
         var index = 0
         //var localError: NSError?
         for item in data {
@@ -81,15 +77,17 @@ public class EntityDescriptor : ResponseDescriptor {
             //localError = nil
             
             
-            let o: AnyObject? = try self.respond(item)
+            let o = try self.respond(item)
             
             
             
             if self.batchSize > 0 && index > 0 && (index % self.batchSize) == 0  {
                 
-                /*self.context.performBlockAndWait { () in
-                    self.context.save(&localError)
-                }*/
+                self.context.performBlockAndWait { () in
+                    do {
+                        try self.context.save()
+                    } catch { }
+                }
             
             }
             index++
@@ -101,7 +99,7 @@ public class EntityDescriptor : ResponseDescriptor {
         
         self.context.performBlockAndWait({ () ->  Void in
             do {
-                try self.context.save()
+                try self.context.saveToPersistentStore()
             } catch { }
         })
         
@@ -109,11 +107,11 @@ public class EntityDescriptor : ResponseDescriptor {
         return out
     }
     
-    public func mapValue(value: JSON) throws -> AnyObject? {
+    public func mapValue(value: JSON) throws -> T? {
         if self.mapper != nil {
             
             var localError: NSError?
-            var result: AnyObject?
+            var result: T?
             
             self.context.performBlockAndWait({ () -> Void in
                 do {
@@ -131,7 +129,7 @@ public class EntityDescriptor : ResponseDescriptor {
             return result
             
         } else {
-            return value.dictionaryObject
+            return nil
         }
     }
     

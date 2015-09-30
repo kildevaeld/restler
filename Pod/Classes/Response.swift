@@ -5,32 +5,31 @@ import Foundation
 import Bolts
 
 public protocol ResponseDescriptor {
-    func respond(data:AnyObject!) throws -> AnyObject?
-    func respondArray(data:[AnyObject]) throws -> [AnyObject]
+    typealias ReturnType
+    func respond(data:AnyObject!) throws -> ReturnType?
+    func respondArray(data:[AnyObject]) throws -> [ReturnType]
 }
 
-public typealias MapperFunc = (value: AnyObject!) throws -> AnyObject?
 
-public class ResponseDescription : ResponseDescriptor {
-  public var mapper: MapperFunc?
-  public init (map: MapperFunc) {
-    self.mapper = map
-  }
+public class ResponseDescription<T: AnyObject> : ResponseDescriptor {
+    public var mapper: ((value: AnyObject!) throws -> T?)?
+    public init (map: (value: AnyObject!) throws -> T?) {
+        self.mapper = map
+    }
   
-  public init () { }
+    public init () { }
   
-    public func respond(data: AnyObject!) throws -> AnyObject? {
-        
-        let result: AnyObject? = try self.mapValue(data)
+    public func respond(data: AnyObject!) throws -> T? {
+        let result = try self.mapValue(data)
         return result
   }
   
-    public func respondArray(data: [AnyObject]) throws -> [AnyObject] {
-    var out : [AnyObject] = []
+    public func respondArray(data: [AnyObject]) throws -> [T] {
+    var out : [T] = []
         
     for item in data {
     
-        let o: AnyObject? = try self.respond(item)
+        let o = try self.respond(item)
         
         if o != nil {
             out.append(o!)
@@ -41,11 +40,11 @@ public class ResponseDescription : ResponseDescriptor {
     return out
   }
   
-    public func mapValue(value: AnyObject!) throws -> AnyObject? {
+    public func mapValue(value: AnyObject!) throws -> T? {
     if self.mapper != nil {
         return try self.mapper!(value: value)
     } else {
-      return value
+      return value as? T
     }
     
   }

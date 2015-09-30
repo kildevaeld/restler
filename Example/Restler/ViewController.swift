@@ -45,7 +45,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let url = NSURL(string:"http://api.livejazz.dk")
+        let url = NSURL(string:"http://localhost:3000")
         let restler = Restler(url:url!)
         //restler.baseURL =
         let dstack = DStack.with("test_db.sqlite")!
@@ -73,7 +73,7 @@ class ViewController: UIViewController {
             
         })
         
-        let genreDescriptor = EntityDescriptor(dstack.rootContext, map:{ (context, value) -> AnyObject? in
+        let genreDescriptor = EntityDescriptor(dstack.rootContext, map:{ (context, value) -> Genre? in
             
             if value["id"] == nil {
                 return nil
@@ -87,14 +87,28 @@ class ViewController: UIViewController {
             return genre
         })
         
+        let res = restler.resource("/genre", descriptor: genreDescriptor)
+        //res.parameters = Parameters(["access":"mobile"])
+    
+        res.request("/genre.json", parameters: ["access": "mobile"])
+        .then { (data) -> Void in
+            //print("DATA \(data)")
+        }
+        
+        //let res2 = restler.findResource(Genre.self)
+        //print("eq: \(res2) - \(res)")
         let header = { (request: NSMutableURLRequest, parameters: Parameters) -> Parameters? in
             request.setValue("access-key", forHTTPHeaderField: "X-Access-Key")
             return parameters
         }
         
-        let resource = restler.resource("/v2/concert", name:"concerts", descriptor: descriptor, paginated:true)
-        
-        resource.setOnRequest(header)
+        restler.resource("/v2/concert.json", name:"concerts", descriptor: descriptor)
+        .paginate()
+        .setOnRequest(header)
+        .request("/v2/concert", parameters: nil)
+        .then { (data) -> Void in
+            print("DATA")
+        }
         //resource.setOnRequest(header)
         //resource.paginated = false
         //resource.timeout = 10
@@ -103,7 +117,7 @@ class ViewController: UIViewController {
         //restler.resource("/genre", name:"genres", descriptor: genreDescriptor)
             //.setOnRequest(header)
         
-        var tasks : [BFTask] = []
+        /*var tasks : [BFTask] = []
         let timer = ParkBenchTimer()
         var t = restler.get(resource:"concerts", progress:nil) { (e,r,rs) in
             print("concerts complete");
@@ -118,7 +132,7 @@ class ViewController: UIViewController {
         .continueWithBlock { (task) -> AnyObject! in
             print("all done \(timer.stop())")
             return nil
-        }
+        }*/
         
         
         

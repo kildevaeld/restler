@@ -1,22 +1,32 @@
 PODS:
   - Alamofire (2.0.2)
-  - Bolts/Tasks (1.3.0)
   - DStack (0.1.0)
+  - Promissum (0.3.0):
+    - Promissum/Core (= 0.3.0)
+  - Promissum/Alamofire (0.3.0):
+    - Alamofire (~> 2.0.0)
+    - Promissum/Core
+  - Promissum/Core (0.3.0)
   - Restler (0.0.1):
     - Alamofire
-    - Bolts/Tasks
+    - Promissum (~> 0.3.0)
+    - Promissum/Alamofire (~> 0.3.0)
     - Restler/Core (= 0.0.1)
-    - XCGLogger
+    - SwiftyJSON (~> 2.3.0)
+    - XCGLogger (~> 3.0)
   - Restler/Core (0.0.1):
     - Alamofire
-    - Bolts/Tasks
-    - XCGLogger
+    - Promissum (~> 0.3.0)
+    - Promissum/Alamofire (~> 0.3.0)
+    - SwiftyJSON (~> 2.3.0)
+    - XCGLogger (~> 3.0)
   - Restler/CoreData (0.0.1):
     - Alamofire
-    - Bolts/Tasks
     - DStack
-    - SwiftyJSON
-    - XCGLogger
+    - Promissum (~> 0.3.0)
+    - Promissum/Alamofire (~> 0.3.0)
+    - SwiftyJSON (~> 2.3.0)
+    - XCGLogger (~> 3.0)
   - SwiftyJSON (2.3.0)
   - XCGLogger (3.0)
 
@@ -33,9 +43,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 8edbab00802a752bb5240cc2abe70e7e881488ad
-  Bolts: 805a4a87413e49d4a0c2b7d469084cbc46b09342
   DStack: 10d56ec698423ef2c86c3fb1506f58dfa379a09f
-  Restler: a8ce33b4c84ca7bfa763921b23e9cd89f5a53483
+  Promissum: bfa1008ed6a7b4acb23d60ccc1b791f566b27c6c
+  Restler: f7d87da5af35a9379dddb91fd980452c351eccc7
   SwiftyJSON: 8d6b61a70277ef2a5d710d372e06e7e2d87fb9e4
   XCGLogger: 5802533aff8bafc8b3b9776ab8972576f31d0a4e
 

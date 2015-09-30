@@ -36,11 +36,13 @@ Pod::Spec.new do |s|
      cd.source_files = 'Pod/Classes/CoreData/**/*'
      cd.framework = 'CoreData'
      cd.dependency 'DStack'
-     cd.dependency 'SwiftyJSON', '~> 2.3.0'
+     
   end
 
-  s.dependency 'Bolts/Tasks'
+#s.dependency 'Bolts/Tasks'
   s.dependency 'Alamofire'
   s.dependency 'XCGLogger', '~> 3.0'
-
+  s.dependency 'Promissum', '~> 0.3.0'
+  s.dependency 'Promissum/Alamofire', '~> 0.3.0'
+  s.dependency 'SwiftyJSON', '~> 2.3.0'
 end

@@ -10,18 +10,29 @@ import Foundation
 import Bolts
 import Alamofire
 
-public protocol IResource {
+/*public protocol IResource {
     var name: String { get }
     var timeout: Double { get set }
     var descriptor: ResponseDescriptor? { get set }
     func all(parameters:Parameters?, progress:ProgressBlock?, complete: ResourceCompletion?) -> BFTask
     func setOnRequest (fn: (request: NSMutableURLRequest, parameters: Parameters) -> Parameters?)
-}
+}*/
+
+
+/*public typealias ResourceCompletion = (error:NSError?, result: AnyObject?) -> Void
 
 public typealias Parameters = Dictionary<String, AnyObject>
 
-public typealias ResourceCompletion = (error:NSError?, result: AnyObject?) -> Void
+func +(var lhs:Parameters, rhs:Parameters) -> Parameters {
+    for (key, value) in rhs {
+        lhs.updateValue(value, forKey: key)
+    }
+    return lhs
+}
 
+func +=(inout lhs:Parameters, rhs:Parameters) {
+    lhs = lhs + rhs
+}
 
 func extendParameters (inout param: Parameters, param2: Parameters) {
     for (key, value) in param2 {
@@ -49,19 +60,7 @@ public enum ResourceEvent : String, EventConvertible {
         return self.rawValue
     }
 }
-func synchronized (obj:NSObject, fn:() -> Void) {
-    objc_sync_enter(obj)
-    fn()
-    objc_sync_exit(obj)
-}
 
-func synchronized<T>(obj:NSObject, fn:() -> T) -> T {
-    let result: T
-    objc_sync_enter(obj)
-    result = fn()
-    objc_sync_exit(obj)
-    return result
-}
 
 
 public class BaseResource: EventEmitter, IResource {
@@ -95,11 +94,15 @@ public class BaseResource: EventEmitter, IResource {
         }
     }
     
-    
+    // Name of the resouce
     public let name: String
+    // The path of the resource, relative to baseURL
     public let path: String
+    // Minimum duration since last update
     public var timeout: Double = 0
+    // Reponse descriptor
     public var descriptor: ResponseDescriptor?
+    // Parameters for all request on the resource
     public var parameters: Parameters?
     
     public var onRequestBlock: ((request: NSMutableURLRequest, parameters: Parameters) -> Parameters?)?
@@ -116,7 +119,7 @@ public class BaseResource: EventEmitter, IResource {
     }
     
     
-    public func request (request: NSURLRequest, progress: ProgressBlock?, completion:((req:NSURLRequest, res:NSURLResponse?, data:NSData?, error:NSError?) -> Void)? = nil) -> BFTask {
+    public func request (request: NSURLRequest, progress: ProgressBlock?, completion:((req:NSURLRequest?, res:NSURLResponse?, data:AnyObject?, error:NSError?) -> Void)? = nil) -> BFTask {
         
         self.lastUpdate = NSDate()
         
@@ -182,7 +185,7 @@ public class BaseResource: EventEmitter, IResource {
         }
         
         if parameters != nil {
-            extendParameters(&params, param2:parameters!)
+            params += parameters!
         }
         
         if self.onRequestBlock != nil {
@@ -265,4 +268,4 @@ extension BaseResource {
         })
     }
     
-}
+}*/
