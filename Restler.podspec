@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
                        * Don't worry about the indent, we strip it!
                        DESC
   s.homepage         = "https://github.com/kildevaeld/restler"
-  
+
   s.license          = 'MIT'
   s.author           = { "Softshag & Me" => "admin@softshag.dk" }
   s.source           = { :git => "https://github.com/kildevaeld/restler.git", :tag => s.version.to_s }
@@ -36,11 +36,11 @@ Pod::Spec.new do |s|
      cd.source_files = 'Pod/Classes/CoreData/**/*'
      cd.framework = 'CoreData'
      cd.dependency 'DStack'
-     cd.dependency 'SwiftyJSON'
+     cd.dependency 'SwiftyJSON', '~> 2.3.0'
   end
 
   s.dependency 'Bolts/Tasks'
   s.dependency 'Alamofire'
-  s.dependency 'XCGLogger'
+  s.dependency 'XCGLogger', '~> 3.0'
 
 end
