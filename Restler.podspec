@@ -45,4 +45,5 @@ Pod::Spec.new do |s|
   s.dependency 'Promissum', '~> 0.3.0'
   s.dependency 'Promissum/Alamofire', '~> 0.3.0'
   s.dependency 'SwiftyJSON', '~> 2.3.0'
+  s.dependency 'ReachabilitySwift', '~> 2.0'
 end

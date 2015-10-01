@@ -32,6 +32,9 @@
     ],
     "SwiftyJSON": [
       "~> 2.3.0"
+    ],
+    "ReachabilitySwift": [
+      "~> 2.0"
     ]
   },
   "subspecs": [

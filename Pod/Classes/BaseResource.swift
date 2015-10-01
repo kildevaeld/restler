@@ -1,25 +1,29 @@
 //
-//  BaseResource.swift
+//  BBaseResource.swift
 //  Pods
 //
-//  Created by Rasmus Kildevæld   on 05/09/15.
+//  Created by Rasmus Kildevæld   on 30/09/15.
 //
 //
 
 import Foundation
-import Bolts
 import Alamofire
+import Promissum
 
-/*public protocol IResource {
+
+public protocol IResource {
+    //typealias Descriptor = ResponseDescriptor
     var name: String { get }
     var timeout: Double { get set }
-    var descriptor: ResponseDescriptor? { get set }
-    func all(parameters:Parameters?, progress:ProgressBlock?, complete: ResourceCompletion?) -> BFTask
-    func setOnRequest (fn: (request: NSMutableURLRequest, parameters: Parameters) -> Parameters?)
-}*/
+    func request(parameters:Parameters?, completion:(result:[AnyObject]?, error:ErrorType?) -> Void)
+    //var descriptor: Descriptor? { get set }
+    //func all(parameters:Parameters?, progress:ProgressBlock?, complete: ResourceCompletion?) -> BFTask
+    //func setOnRequest (fn: (request: NSMutableURLRequest, parameters: Parameters) -> Parameters?)
+}
 
-
-/*public typealias ResourceCompletion = (error:NSError?, result: AnyObject?) -> Void
+public protocol ITypedResource: IResource {
+    
+}
 
 public typealias Parameters = Dictionary<String, AnyObject>
 
@@ -34,36 +38,9 @@ func +=(inout lhs:Parameters, rhs:Parameters) {
     lhs = lhs + rhs
 }
 
-func extendParameters (inout param: Parameters, param2: Parameters) {
-    for (key, value) in param2 {
-        param.updateValue(value, forKey: key)
-    }
-}
 
-
-public let kBeforeRequestEvent = "before:request"
-public let kRequestEvent = "request"
-public let kBeforeRequestPaginatedEvent = "before:request:paginated"
-public let kRequestPage = "request:page"
-public let kRequestPaginated = "request:paginated"
-public let kErrorEvent = "error"
-
-public enum ResourceEvent : String, EventConvertible {
-    case BeforeRequest = "before:request"
-    case Request = "request"
-    case BeforePaginatedRequest = "before:request:paginated"
-    case RequestPage = "request:page"
-    case PaginatedRequest = "request:paginated"
-    case Error = "error"
-    
-    public var eventName: String {
-        return self.rawValue
-    }
-}
-
-
-
-public class BaseResource: EventEmitter, IResource {
+public class BaseResource<T:ResponseDescriptor where T.ReturnType:AnyObject> : IResource {
+    // MARK: - Properties
     private let _lock = NSObject();
     let restler: Restler
     
@@ -94,6 +71,15 @@ public class BaseResource: EventEmitter, IResource {
         }
     }
     
+    public var onRequestBlock: ((request: NSMutableURLRequest, parameters: Parameters) -> Parameters?)?
+    
+    public func setOnRequest (fn: (request: NSMutableURLRequest, parameters: Parameters) -> Parameters?) -> Self {
+        self.onRequestBlock = fn
+        return self
+    }
+
+
+    
     // Name of the resouce
     public let name: String
     // The path of the resource, relative to baseURL
@@ -101,78 +87,93 @@ public class BaseResource: EventEmitter, IResource {
     // Minimum duration since last update
     public var timeout: Double = 0
     // Reponse descriptor
-    public var descriptor: ResponseDescriptor?
+    public var descriptor: T
     // Parameters for all request on the resource
     public var parameters: Parameters?
     
-    public var onRequestBlock: ((request: NSMutableURLRequest, parameters: Parameters) -> Parameters?)?
     
-    public func setOnRequest (fn: (request: NSMutableURLRequest, parameters: Parameters) -> Parameters?) {
-        self.onRequestBlock = fn
-    }
 
-    
-    init (restler: Restler, path: String, name: String) {
-        self.path = path
-        self.name = name
+    init(restler: Restler, name: String, path: String, descriptor:T) {
         self.restler = restler
+        self.name = name
+        self.path = path
+        self.descriptor = descriptor
     }
     
     
-    public func request (request: NSURLRequest, progress: ProgressBlock?, completion:((req:NSURLRequest?, res:NSURLResponse?, data:AnyObject?, error:NSError?) -> Void)? = nil) -> BFTask {
-        
+    func request(request: NSURLRequest, progress: ProgressBlock?, completion:(data:[T.ReturnType]?, error:ErrorType?) -> Void) {
+    
         self.lastUpdate = NSDate()
         
-        let task = self.restler.request(request, progress: progress, completion: completion)
-        
-        return task.continueWithBlock { (result) -> AnyObject! in
-        
-            if result.error != nil {
-                self.emit(ResourceEvent.Error, data: result.error)
-                return task
+        self.restler.request(request, progress: progress) { [unowned self] (req, res, data, error) -> Void in
+            
+            if error != nil {
+                completion(data: nil,error: error)
+                return
             }
             
-            //let executor = BFExecutor.mainThreadExecutor()
-            
-            let item: AnyObject?
-            //var error: NSError?
-            if self.descriptor != nil {
-                
-                do {
-                    
-                    if let array = result.result as? [AnyObject] {
-                        item = try self.descriptor!.respondArray(array)
+            do {
+                let item: [T.ReturnType]?
+                if let array = data as? [AnyObject] {
+                    item = try self.descriptor.respondArray(array)
+                } else {
+                    let i = try self.descriptor.respond(data)
+                    if i != nil {
+                        item = [i!]
                     } else {
-                        item = try self.descriptor!.respond(result.result)
+                        item = nil
                     }
-                    
-                } catch let e as NSError {
-                    return BFTask(error: e)
                 }
                 
-            } else {
-                item = result.result
+                completion(data: item, error: nil)
+                
+            } catch let e as NSError {
+                completion(data: nil, error: e)
             }
+        }
+        
+    }
+    
+    public func request (path: String, parameters: Parameters?, method: Alamofire.Method = .GET, progress: ProgressBlock? = nil) -> Promise<[T.ReturnType]?, ErrorType> {
+        
+        let promiseSource = PromiseSource<[T.ReturnType]?, ErrorType>()
+        
+        let request: NSURLRequest
+        do {
+            (request,_) = try self.getRequest(method, path: path, parameters: parameters)
+        } catch let e {
+            promiseSource.reject(e)
+            return promiseSource.promise
+        }
+        print("HER")
+        self.request(request, progress: progress) { (data, error) -> Void in
             
-            return item
+            if error != nil {
+                promiseSource.reject(error!)
+            } else {
+                promiseSource.resolve(data)
+            }
+        }
+
+        return promiseSource.promise
+    }
+    // IResource
+    public func request(parameters:Parameters?, completion:(result:[AnyObject]?, error:ErrorType?) -> Void) {
+        self.request(self.path, parameters: parameters)
+        .then { (result: [T.ReturnType]?) -> Void in
+            var res: [AnyObject]? = nil
+            if result != nil {
+                res = result! as [AnyObject]
+            }
+            completion(result: res, error: nil)
+        }.trap { (error) -> Void in
+            completion(result: nil, error: error)
         }
     }
     
-    public func request (path: String, parameters: Parameters?, method: Alamofire.Method = .GET, progress: ProgressBlock? = nil) -> BFTask {
-        
-        let (error, request, _) = self.getRequest(method, path: path, parameters: parameters)
-        
-        
-        
-        if error != nil {
-            self.emit(ResourceEvent.Error, data: error)
-            return BFTask(error: error)
-        }
-        return self.request(request, progress: progress)
-        
-    }
     
-    func getRequest (method: Alamofire.Method = .GET, path: String, parameters: Parameters?) -> (error: NSError?, request: NSURLRequest, parameters: Parameters) {
+    // MARK: - Internals
+    func getRequest (method: Alamofire.Method = .GET, path: String, parameters: Parameters?) throws -> (request: NSURLRequest, parameters: Parameters) {
         
         let url = self.baseURL.URLByAppendingPathComponent(path)
         var request = NSMutableURLRequest(URL: url)
@@ -196,27 +197,20 @@ public class BaseResource: EventEmitter, IResource {
         }
         
         if !params.isEmpty {
-            let encoded = self.encodeRequest(request, parameters: params)
-            
-            if encoded.error != nil {
-                return (encoded.error, request, params)
-            }
-            request = encoded.request?.mutableCopy() as! NSMutableURLRequest
+            request = try self.encodeRequest(request, parameters: params)
         }
         
-        return (nil, request, params)
+        return (request, params)
     }
     
-    func encodeRequest (request: NSURLRequest, parameters: Parameters) -> (error: NSError?, request: NSURLRequest?) {
+    func encodeRequest (request: NSURLRequest, parameters: Parameters) throws -> NSMutableURLRequest {
         let encoding = Alamofire.ParameterEncoding.URL
         let encoded = encoding.encode(request, parameters: parameters)
         if encoded.1 != nil {
-            return (encoded.1, nil)
+            throw encoded.1!
         }
         
-        let request = encoded.0 as NSURLRequest
-        
-        return (nil, request)
+        return (encoded.0 as NSURLRequest).mutableCopy() as! NSMutableURLRequest
     }
     
     func should_update () -> Bool {
@@ -229,43 +223,5 @@ public class BaseResource: EventEmitter, IResource {
         let diff = self.lastUpdate != nil ? now.timeIntervalSinceNow - self.lastUpdate!.timeIntervalSinceNow : self.timeout
         return diff
     }
-    
 }
 
-
-public func ==(lhs: BaseResource, rhs: BaseResource) -> Bool {
-    return lhs.name == rhs.name
-}
-
-
-extension BaseResource {
-    
-    
-    
-    public func all(parameters:Parameters?, progress:ProgressBlock? = nil, complete: ResourceCompletion?) -> BFTask {
-        let task: BFTask
-        
-        task = self.request(self.path, parameters: parameters, progress:progress)
-        
-        return task.continueWithBlock { (task) -> AnyObject! in
-            complete?(error: task.error, result: task.result)
-            return task.result
-        }
-    }
-    
-    public func get(id: String, complete: ResourceCompletion) {
-        let path = (self.path as NSString).stringByAppendingPathComponent(id)
-        self.request(path, parameters: nil)
-            .continueWithBlock { (task) -> AnyObject! in
-                complete(error: task.error, result: task.result)
-                return nil
-        }
-    }
-    
-    public func get<T>(id: String, complete: (error: NSError?, result: T?) -> Void) {
-        self.get(id, complete: { (error, result) -> Void in
-            complete(error: error, result: result as? T)
-        })
-    }
-    
-}*/

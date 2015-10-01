@@ -5,7 +5,7 @@ import Foundation
 import Bolts
 
 public protocol ResponseDescriptor {
-    typealias ReturnType
+    typealias ReturnType: AnyObject
     func respond(data:AnyObject!) throws -> ReturnType?
     func respondArray(data:[AnyObject]) throws -> [ReturnType]
 }

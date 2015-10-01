@@ -7,10 +7,12 @@ PODS:
     - Alamofire (~> 2.0.0)
     - Promissum/Core
   - Promissum/Core (0.3.0)
+  - ReachabilitySwift (2.0)
   - Restler (0.0.1):
     - Alamofire
     - Promissum (~> 0.3.0)
     - Promissum/Alamofire (~> 0.3.0)
+    - ReachabilitySwift (~> 2.0)
     - Restler/Core (= 0.0.1)
     - SwiftyJSON (~> 2.3.0)
     - XCGLogger (~> 3.0)
@@ -18,6 +20,7 @@ PODS:
     - Alamofire
     - Promissum (~> 0.3.0)
     - Promissum/Alamofire (~> 0.3.0)
+    - ReachabilitySwift (~> 2.0)
     - SwiftyJSON (~> 2.3.0)
     - XCGLogger (~> 3.0)
   - Restler/CoreData (0.0.1):
@@ -25,6 +28,7 @@ PODS:
     - DStack
     - Promissum (~> 0.3.0)
     - Promissum/Alamofire (~> 0.3.0)
+    - ReachabilitySwift (~> 2.0)
     - SwiftyJSON (~> 2.3.0)
     - XCGLogger (~> 3.0)
   - SwiftyJSON (2.3.0)
@@ -45,7 +49,8 @@ SPEC CHECKSUMS:
   Alamofire: 8edbab00802a752bb5240cc2abe70e7e881488ad
   DStack: 10d56ec698423ef2c86c3fb1506f58dfa379a09f
   Promissum: bfa1008ed6a7b4acb23d60ccc1b791f566b27c6c
-  Restler: f7d87da5af35a9379dddb91fd980452c351eccc7
+  ReachabilitySwift: 227b98ae7ec99e1c01148b17fb22357aa91a5675
+  Restler: f5bccbf067cf7a0c2b34cfe14cc6734e88c82f1f
   SwiftyJSON: 8d6b61a70277ef2a5d710d372e06e7e2d87fb9e4
   XCGLogger: 5802533aff8bafc8b3b9776ab8972576f31d0a4e
 

@@ -8,7 +8,7 @@
 
 import Foundation
 import Alamofire
-
+import Promissum
 
 
 
@@ -33,6 +33,22 @@ public class Resource<T:ResponseDescriptor> : BaseResource<T> {
     
     override init(restler: Restler, name: String, path: String, descriptor:T) {
         super.init(restler: restler, name: name, path: path, descriptor: descriptor)
+    }
+    
+    
+    public func all (parameters:Parameters? = nil, progress:ProgressBlock? = nil) -> Promise<[T.ReturnType]?, ErrorType> {
+        return self.request(self.path, parameters: parameters, progress:progress)
+    }
+    
+    public func get (id: String, parameters: Parameters? = nil, progress:ProgressBlock? = nil) -> Promise<T.ReturnType?, ErrorType> {
+        let path = (self.path as NSString).stringByAppendingPathComponent(id)
+        return self.request(path, parameters: parameters, progress:progress)
+        .map({ (result) -> T.ReturnType? in
+            if result!.count > 0 {
+                return result![0]
+            }
+            return nil
+        })
     }
 
     override func request(request: NSURLRequest, progress: ProgressBlock?, completion:(data:[T.ReturnType]?, error:ErrorType?) -> Void) {

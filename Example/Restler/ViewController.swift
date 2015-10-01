@@ -90,9 +90,11 @@ class ViewController: UIViewController {
         let res = restler.resource("/genre", descriptor: genreDescriptor)
         //res.parameters = Parameters(["access":"mobile"])
     
-        res.request("/genre.json", parameters: ["access": "mobile"])
+        res!.request("/genre.json", parameters: ["access": "mobile"])
         .then { (data) -> Void in
-            //print("DATA \(data)")
+            print("DATA \(data)")
+        }.trap { (error) -> Void in
+            print("fejl")
         }
         
         //let res2 = restler.findResource(Genre.self)
@@ -102,13 +104,23 @@ class ViewController: UIViewController {
             return parameters
         }
         
-        restler.resource("/v2/concert.json", name:"concerts", descriptor: descriptor)
+        restler.resource("/v2/concert.json", name:"concerts", descriptor: descriptor)!
         .paginate()
         .setOnRequest(header)
-        .request("/v2/concert", parameters: nil)
-        .then { (data) -> Void in
-            print("DATA")
+        .all()
+        .then({ (ret) -> Void in
+            print("ret")
+        })
+        .trap { (e) -> Void in
+            print("error \(e)")
         }
+        
+        /*restler.get("concerts")
+        .then { (result) -> Void in
+            print("HERE")
+        }.trap { (error) -> Void in
+            print("Wow, got error \(error)")
+        }*/
         //resource.setOnRequest(header)
         //resource.paginated = false
         //resource.timeout = 10

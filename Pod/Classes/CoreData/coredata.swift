@@ -36,7 +36,7 @@ public enum RestlerError : ErrorType {
 
 public typealias ManagedResourceCompletetion = (context: NSManagedObjectContext, value: JSON) throws -> AnyObject?
 
-public class EntityDescriptor<T> : ResponseDescriptor {
+public class EntityDescriptor<T: AnyObject> : ResponseDescriptor {
     private let mapper: ((context: NSManagedObjectContext, value: JSON) throws -> T?)?
     
     public let context: NSManagedObjectContext

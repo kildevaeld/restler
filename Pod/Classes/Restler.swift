@@ -8,9 +8,10 @@
 
 import Foundation
 import Alamofire
-//import Bolts
+import ReachabilitySwift
 import Promissum
 import XCGLogger
+
 let sessionIdentifier = "com.softshag.restler"
 var kRestlerMappingQueue = "com.softshag.restler.mapping_queue"
 
@@ -87,6 +88,11 @@ public enum Events : EventConvertible {
     }
 }*/
 
+public enum RestError : ErrorType {
+    case Error(String)
+    case HostUnreachable
+}
+
 public class Restler : NSObject {
     
     public static var serializers: Dictionary<String, serializer> = [
@@ -103,63 +109,123 @@ public class Restler : NSObject {
         return log
     }
     
-    let manager: Alamofire.Manager
-    let mapping_queue : dispatch_queue_t = dispatch_queue_create(kRestlerMappingQueue, DISPATCH_QUEUE_CONCURRENT)
-    let emitter = EventEmitter()
+    private let manager: Alamofire.Manager
+    private let mapping_queue : dispatch_queue_t = dispatch_queue_create(kRestlerMappingQueue, DISPATCH_QUEUE_CONCURRENT)
     
     var resources : [IResource] = []
-    //var listeners : [Listener] = []
+    var reachability: Reachability
+    
+    private var _reachabilityCheck: Bool = false
+    private var _lock: NSObject = NSObject()
+    private var _listeners: [PromiseSource<Bool, ErrorType>] = []
+    private var reachabilityCheck: Bool {
+        get {
+            return synchronized(self._lock) { [unowned self] () -> Bool in
+                return self._reachabilityCheck
+            }
+        }
+        set (value) {
+            synchronized(self._lock) { [unowned self] () -> Void in
+                self._reachabilityCheck = value
+            }
+        }
+        
+    }
     
     public var baseURL: NSURL
     
     public init (url:NSURL) {
         let configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(sessionIdentifier)
         configuration.HTTPAdditionalHeaders = Alamofire.Manager.defaultHTTPHeaders
+        
         self.manager = Alamofire.Manager(configuration: configuration)
         
         self.baseURL = url
+        self.reachability = Reachability(hostname: url.absoluteString)!
     }
     
     func request(URLRequest: NSURLRequest, progress: ProgressBlock?, completion:(req:NSURLRequest?, res:NSHTTPURLResponse?, data:AnyObject?, error:ErrorType?) -> Void) {
         
-        self.manager.request(.GET, URLRequest)
-        .validate()
-        
-        self.manager.request(.GET, URLRequest)
-        .validate()
-        .progress { (written, totalWritten, totalExpected) -> Void in
-            if progress != nil {
-                dispatch_main {
-                    progress!(progress: totalWritten, total: totalExpected)
-                }
-            }
-        }
-        
-        .response(queue: self.mapping_queue, responseSerializer: Request.dataResponseSerializer()) { (req, res, result) -> Void in
-            var error: ErrorType? = nil
-            var out: AnyObject? = nil
-            if result.isFailure {
-                error = result.error
-            } else if res?.MIMEType == nil {
-               out = result.value
-            } else {
-                let serializer = Restler.serializers[res!.MIMEType!]
-                
-                if serializer == nil || result.value == nil {
-                    out = result.value
-                    
-                } else {
-                    do {
-                        let result = try serializer!(data: result.value!)
-                        out = result
-                    } catch let e as NSError {
-                        error = e
-                    }
-                }
+        self.isReachable()
+        .then { [unowned self] (online) -> Void in
+            if !online {
+                completion(req: nil, res: nil, data: nil, error: RestError.HostUnreachable)
+                return
             }
             
-            completion(req: req,res: res,data: out,error: error)
+            let request = self.manager.request(.GET, URLRequest)
+            .validate()
+            request
+            .progress { (written, totalWritten, totalExpected) -> Void in
+                if progress != nil {
+                    dispatch_main {
+                        progress!(progress: totalWritten, total: totalExpected)
+                    }
+                }
+                }
+                
+            .response(queue: self.mapping_queue, responseSerializer: Request.dataResponseSerializer()) { (req, res, result) -> Void in
+                    var error: ErrorType? = nil
+                    var out: AnyObject? = nil
+                    
+                    if result.isFailure {
+                        error = result.error
+                    } else if res?.MIMEType == nil {
+                        out = result.value
+                    } else {
+                        let serializer = Restler.serializers[res!.MIMEType!]
+                        
+                        if serializer == nil || result.value == nil {
+                            out = result.value
+                            
+                        } else {
+                            do {
+                                let result = try serializer!(data: result.value!)
+                                out = result
+                            } catch let e as NSError {
+                                error = e
+                            }
+                        }
+                    }
+                    
+                    completion(req: req,res: res,data: out,error: error)
+            }
+
         }
+        
+        
+        
+    }
+    
+    func isReachable () -> Promise<Bool, ErrorType> {
+        let source = PromiseSource<Bool, ErrorType>()
+        _listeners.append(source)
+        
+        if reachabilityCheck {
+            return source.promise
+        }
+        
+        self.reachabilityCheck = true
+        //let source = PromiseSource<Bool, ErrorType>()
+        
+        let checker = { [unowned self] (r:Reachability) in
+            self.reachability.stopNotifier()
+            let listeners = self._listeners
+            self._listeners = []
+            self.reachabilityCheck = false
+            
+            
+            for s in listeners {
+                s.resolve(r.isReachable())
+            }
+        }
+        
+        self.reachability.whenReachable = checker
+        self.reachability.whenUnreachable = checker
+        
+        self.reachability.startNotifier()
+        
+        return source.promise
         
     }
     
@@ -172,136 +238,59 @@ public class Restler : NSObject {
         return nil
     }
     
-    /*public func findResource<U>(type:U.Type) -> IResource? {
-        for res in self.resources {
-            if let r = res as? BaseResource<ResponseDescription<U>,U> {
-                if r.descriptor.dynamicType.ReturnType.self == type {
-                    return r
-                }
-            }
-        }
-        return nil
-    }*/
     
-    public func resource<T : ResponseDescriptor>(path: String, var name: String? = nil, descriptor: T, paginated:Bool = false) -> Resource<T> {
+    
+    public func resource<T : ResponseDescriptor>(path: String, var name: String? = nil, descriptor: T? = nil) -> Resource<T>? {
         if name == nil {
             name = path
         }
         
-        /*let resource = Resource(restler:self, path: path, name: name!)
-        
-        if contains(self.resources, resource) {
-            return self.resources[find(self.resources,resource)!]
-        }*/
-        
         var resource = findResource(name!) as? Resource<T>
         
-        if resource != nil {
-            return resource!
+        if resource != nil || descriptor == nil {
+            return resource
         }
         
-        if paginated == true {
-            //resource = PaginatedResource(restler:self, path: path, name: name!, descriptor)
-        } else {
-            resource = Resource(restler: self, name: name!,path: path, descriptor: descriptor)
-        }
+        resource = Resource(restler: self, name: name!,path: path, descriptor: descriptor!)
     
-        //resource!.descriptor = descriptor
         self.resources.append(resource!)
         
         return resource!
     }
     
-    /*private func onResourceEmit (event: IEvent) {
-        let sender = event.sender as! Resource
-        
-        let ev = sender.name + ":" + event.name
-        
-        self.emitter.emit(ev, data: event as? AnyObject)
-        self.emitter.emit(event.name, data: event as? AnyObject)
     }
-    
-    
-    public func on(observer: AnyObject, event: Events, handler: (event: IEvent) -> Void) {
-        
-        let listener: Listener
-        var resource: IResource?
-        
-        if event.resourceName != nil {
-            resource = self.resource(event.resourceName!)
-        }
-        
-        
-        let ehandler = self.emitter.on(event, handler: handler)
-        
-        listener = Listener(observer: observer, event: event.eventName, resource: resource, handler: ehandler)
-        
-        self.listeners.append(listener)
-        
-    }*/
-    /*
-    public func off(observer: AnyObject?, event: Events) {
-        let lis = self.listeners
-        
-        for listener in lis {
-            if listener.event == event.eventName && listener.observer === observer {
-                self.emitter.off(listener.handler)
-                self.listeners.removeAtIndex(self.listeners.indexOf(listener)!)
-            }
-        }
-    }
-    
-    public func off(observer: AnyObject?) {
-        let lis = self.listeners
-        
-        for listener in lis {
-            if listener.observer === observer {
-                self.emitter.off(listener.handler)
-                self.listeners.removeAtIndex(self.listeners.indexOf(listener)!)
-            }
-        }
-    }
-    
-    deinit {
-        for _ in self.resources {
-            //resource.off()
-        }
-        self.emitter.off()
-    }*/
-}
 
 
 // MARK: - Convience
-/*extension Restler {
+extension Restler {
     
-    public func get(resource name: String, params:Parameters? = nil, progress: ProgressBlock? = nil, complete: CompletionBlock? = nil) -> BFTask {
-        let resource = self.resource(name)
-        /*return resource.all(params, complete: { (error:NSError?, result:AnyObject?) -> Void in
-            complete?(error: error,data: result,resource: resource)
-        })*/
-        return resource.all(params, progress:nil, complete: { (error, result) -> Void in
-            //complete?(error: error, data: <#T##AnyObject?#>, resource: <#T##Resource#>)
-        });
+    public func get(name: String, params:Parameters? = nil, progress: ProgressBlock? = nil) -> Promise<[AnyObject], ErrorType> {
+        let resource = findResource(name)
+        if resource == nil {
+            return Promise(error: RestError.Error("resource: \(name) not defined"))
+        }
+        
+        let source = PromiseSource<[AnyObject], ErrorType>()
+        resource!.request(params, completion: { (result, error) -> Void in
+            if error != nil {
+                source.reject(error!)
+            } else {
+                source.resolve(result!)
+            }
+        })
+        
+        return source.promise
 
     }
     
-    public func get(resources: [String], progress: ProgressBlock? = nil, complete:((error:NSError?) -> Void)? = nil) -> BFTask {
-        var tasks : [BFTask] = []
-        
+    public func get(resources: [String], progress: ProgressBlock? = nil) -> Promise<[[AnyObject]], ErrorType> {
+        var tasks : [Promise<[AnyObject], ErrorType>] = []
         
         for name in resources {
-            let task = self.get(resource: name, progress: nil, complete: { (error, data, resource) -> Void in
-                
-            })
-            
+            let task = self.get(name, params: nil, progress: progress)
             tasks.append(task)
         }
         
-        return BFTask(forCompletionOfAllTasks: tasks)
-            .continueWithBlock { (task) -> AnyObject! in
-                complete?(error: task.error)
-                return nil
-        }
-        
+        return whenAll(tasks)
     }
-}*/
+}
