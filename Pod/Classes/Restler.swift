@@ -141,56 +141,46 @@ public class Restler : NSObject {
         self.manager = Alamofire.Manager(configuration: configuration)
         
         self.baseURL = url
-        self.reachability = Reachability(hostname: url.absoluteString)!
+        self.reachability = Reachability(hostname: url.host!)!
     }
     
     func request(URLRequest: NSURLRequest, progress: ProgressBlock?, completion:(req:NSURLRequest?, res:NSHTTPURLResponse?, data:AnyObject?, error:ErrorType?) -> Void) {
         
-        self.isReachable()
-        .then { [unowned self] (online) -> Void in
-            if !online {
-                completion(req: nil, res: nil, data: nil, error: RestError.HostUnreachable)
-                return
-            }
-            
-            let request = self.manager.request(.GET, URLRequest)
+        self.manager.request(.GET, URLRequest, headers:URLRequest.allHTTPHeaderFields)
             .validate()
-            request
             .progress { (written, totalWritten, totalExpected) -> Void in
                 if progress != nil {
                     dispatch_main {
                         progress!(progress: totalWritten, total: totalExpected)
                     }
                 }
-                }
-                
+            }
+            
             .response(queue: self.mapping_queue, responseSerializer: Request.dataResponseSerializer()) { (req, res, result) -> Void in
-                    var error: ErrorType? = nil
-                    var out: AnyObject? = nil
+                var error: ErrorType? = nil
+                var out: AnyObject? = nil
+                
+                if result.isFailure {
+                    error = result.error
+                } else if res?.MIMEType == nil {
+                    out = result.value
+                } else {
+                    let serializer = Restler.serializers[res!.MIMEType!]
                     
-                    if result.isFailure {
-                        error = result.error
-                    } else if res?.MIMEType == nil {
+                    if serializer == nil || result.value == nil {
                         out = result.value
-                    } else {
-                        let serializer = Restler.serializers[res!.MIMEType!]
                         
-                        if serializer == nil || result.value == nil {
-                            out = result.value
-                            
-                        } else {
-                            do {
-                                let result = try serializer!(data: result.value!)
-                                out = result
-                            } catch let e as NSError {
-                                error = e
-                            }
+                    } else {
+                        do {
+                            let result = try serializer!(data: result.value!)
+                            out = result
+                        } catch let e as NSError {
+                            error = e
                         }
                     }
-                    
-                    completion(req: req,res: res,data: out,error: error)
-            }
-
+                }
+                
+                completion(req: req,res: res,data: out,error: error)
         }
         
         
@@ -201,12 +191,11 @@ public class Restler : NSObject {
         let source = PromiseSource<Bool, ErrorType>()
         _listeners.append(source)
         
-        if reachabilityCheck {
+        if self.reachabilityCheck {
             return source.promise
         }
         
         self.reachabilityCheck = true
-        //let source = PromiseSource<Bool, ErrorType>()
         
         let checker = { [unowned self] (r:Reachability) in
             self.reachability.stopNotifier()
@@ -215,13 +204,16 @@ public class Restler : NSObject {
             self.reachabilityCheck = false
             
             
+            
             for s in listeners {
                 s.resolve(r.isReachable())
             }
         }
+        if self.reachability.whenReachable == nil {
+            self.reachability.whenReachable = checker
+            self.reachability.whenUnreachable = checker
+        }
         
-        self.reachability.whenReachable = checker
-        self.reachability.whenUnreachable = checker
         
         self.reachability.startNotifier()
         
@@ -264,7 +256,7 @@ public class Restler : NSObject {
 // MARK: - Convience
 extension Restler {
     
-    public func get(name: String, params:Parameters? = nil, progress: ProgressBlock? = nil) -> Promise<[AnyObject], ErrorType> {
+    public func fetch(name: String, params:Parameters? = nil, progress: ProgressBlock? = nil) -> Promise<[AnyObject], ErrorType> {
         let resource = findResource(name)
         if resource == nil {
             return Promise(error: RestError.Error("resource: \(name) not defined"))
@@ -283,11 +275,11 @@ extension Restler {
 
     }
     
-    public func get(resources: [String], progress: ProgressBlock? = nil) -> Promise<[[AnyObject]], ErrorType> {
+    public func fetch(resources: [String], progress: ProgressBlock? = nil) -> Promise<[[AnyObject]], ErrorType> {
         var tasks : [Promise<[AnyObject], ErrorType>] = []
         
         for name in resources {
-            let task = self.get(name, params: nil, progress: progress)
+            let task = self.fetch(name, params: nil, progress: progress)
             tasks.append(task)
         }
         

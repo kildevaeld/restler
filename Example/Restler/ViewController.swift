@@ -87,33 +87,37 @@ class ViewController: UIViewController {
             return genre
         })
         
-        let res = restler.resource("/genre", descriptor: genreDescriptor)
-        //res.parameters = Parameters(["access":"mobile"])
+        let res = restler.resource("/genre", name:"genre", descriptor: genreDescriptor)
+        res!.parameters["access"] = "mobile"
     
-        res!.request("/genre.json", parameters: ["access": "mobile"])
+        /*res!.request("/genre.json", parameters: ["access": "mobile"])
         .then { (data) -> Void in
             print("DATA \(data)")
         }.trap { (error) -> Void in
             print("fejl")
-        }
+        }*/
         
         //let res2 = restler.findResource(Genre.self)
         //print("eq: \(res2) - \(res)")
         let header = { (request: NSMutableURLRequest, parameters: Parameters) -> Parameters? in
-            request.setValue("access-key", forHTTPHeaderField: "X-Access-Key")
+            request.setValue("key", forHTTPHeaderField: "X-Access-Key")
             return parameters
         }
         
         restler.resource("/v2/concert.json", name:"concerts", descriptor: descriptor)!
         .paginate()
         .setOnRequest(header)
-        .all()
-        .then({ (ret) -> Void in
-            print("ret")
-        })
-        .trap { (e) -> Void in
+        .parameters["access"] = "mobile"
+        
+        restler.fetch("concerts")
+        
+        /*restler.fetch(["concerts","genre"])
+        .then { (result) -> Void in
+            print("Result \(result)")
+            
+        }.trap { (e) -> Void in
             print("error \(e)")
-        }
+        }*/
         
         /*restler.get("concerts")
         .then { (result) -> Void in

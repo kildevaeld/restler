@@ -12,17 +12,9 @@ import Promissum
 
 
 public protocol IResource {
-    //typealias Descriptor = ResponseDescriptor
     var name: String { get }
     var timeout: Double { get set }
     func request(parameters:Parameters?, completion:(result:[AnyObject]?, error:ErrorType?) -> Void)
-    //var descriptor: Descriptor? { get set }
-    //func all(parameters:Parameters?, progress:ProgressBlock?, complete: ResourceCompletion?) -> BFTask
-    //func setOnRequest (fn: (request: NSMutableURLRequest, parameters: Parameters) -> Parameters?)
-}
-
-public protocol ITypedResource: IResource {
-    
 }
 
 public typealias Parameters = Dictionary<String, AnyObject>
@@ -41,10 +33,10 @@ func +=(inout lhs:Parameters, rhs:Parameters) {
 
 public class BaseResource<T:ResponseDescriptor where T.ReturnType:AnyObject> : IResource {
     // MARK: - Properties
+    private let restler: Restler
     private let _lock = NSObject();
-    let restler: Restler
-    
     private var _lastUpdate: NSDate?
+    
     public var lastUpdate: NSDate? {
         get {
             return synchronized(_lock) { () -> NSDate? in
@@ -89,8 +81,7 @@ public class BaseResource<T:ResponseDescriptor where T.ReturnType:AnyObject> : I
     // Reponse descriptor
     public var descriptor: T
     // Parameters for all request on the resource
-    public var parameters: Parameters?
-    
+    public var parameters: Parameters = Parameters()
     
 
     init(restler: Restler, name: String, path: String, descriptor:T) {
@@ -145,7 +136,7 @@ public class BaseResource<T:ResponseDescriptor where T.ReturnType:AnyObject> : I
             promiseSource.reject(e)
             return promiseSource.promise
         }
-        print("HER")
+        
         self.request(request, progress: progress) { (data, error) -> Void in
             
             if error != nil {
@@ -179,11 +170,7 @@ public class BaseResource<T:ResponseDescriptor where T.ReturnType:AnyObject> : I
         var request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = method.rawValue
         
-        var params = Parameters()
-        
-        if self.parameters != nil {
-            params = self.parameters!
-        }
+        var params = self.parameters
         
         if parameters != nil {
             params += parameters!

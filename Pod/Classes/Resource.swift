@@ -63,20 +63,25 @@ public class Resource<T:ResponseDescriptor> : BaseResource<T> {
             super.request(request, progress: progress, completion: completion)
             return
         }
-        var params = Parameters()
+        var params = self.parameters
         
-        if parameters != nil {
-            params = parameters!
-        }
         var currentPage = 0
         var results : [T.ReturnType] = []
         
-        
+        /*var url = request.URL!
+        url = NSMutableURL(scheme: url.scheme, host: url.host, path: url.path!)!
+        url.port = request.URL!.port*/
+        let url = request.URL!.URLByStrippingQuery()
+        let req = request.mutableCopy() as! NSMutableURLRequest
+        req.URL = url
+        /*for (key, value) in request.allHTTPHeaderFields! {
+            req.setValue(value, forHTTPHeaderField: key)
+        }*/
         
         func next (var page: Int) {
-            self.requestPage(page, request: request, parameters: params, progress: progress, completion: { (data, error) -> Void in
+            self.requestPage(page, request: req, parameters: params, progress: progress, completion: { (data, error) -> Void in
                 
-                if error != nil || data == nil {
+                if error != nil || data == nil || data!.count == 0 {
                     completion(data:results , error: error)
                     return 
                 }
@@ -99,7 +104,7 @@ public class Resource<T:ResponseDescriptor> : BaseResource<T> {
         if (req == nil) {
             return completion(data: nil, error: NSError(domain: "com.softshag.restler", code: 1, userInfo: nil))
         }
-        
+        print("HEADER \(req?.allHTTPHeaderFields)")
         return super.request(req!, progress: progress, completion:completion)
         
     }

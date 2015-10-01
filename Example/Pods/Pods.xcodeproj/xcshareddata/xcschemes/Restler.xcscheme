@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '0A810E9B10B220EDF568FD3F'
+               BlueprintIdentifier = '644B64580977C16C47FD2F7A'
                BlueprintName = 'Restler'
                ReferencedContainer = 'container:Pods.xcodeproj'
                BuildableName = 'Restler.framework'>
