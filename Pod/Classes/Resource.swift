@@ -14,10 +14,7 @@ import Promissum
 
 public class Resource<T:ResponseDescriptor> : BaseResource<T> {
     private var _paginate: Bool = false
-    
-    
-    
-    var pagination_queue = dispatch_queue_create("com.softshag.restler.pagination", DISPATCH_QUEUE_SERIAL)
+    private var pagination_queue = dispatch_queue_create("com.softshag.restler.pagination", DISPATCH_QUEUE_SERIAL)
     
     public var onPaginateBlock: ((parameters: Parameters, page: Int) -> Parameters)?
     
@@ -26,8 +23,8 @@ public class Resource<T:ResponseDescriptor> : BaseResource<T> {
         return self
     }
     
-    public func paginate () -> Self {
-        _paginate = !_paginate
+    public func paginate (paginate:Bool = true) -> Self {
+        _paginate = paginate
         return self
     }
     
@@ -58,7 +55,7 @@ public class Resource<T:ResponseDescriptor> : BaseResource<T> {
         }
         
         self.lastUpdate = NSDate()
-        
+        Restler.log.debug("request: \(self.name), paginated: \(_paginate)")
         if _paginate == false {
             super.request(request, progress: progress, completion: completion)
             return
@@ -68,15 +65,9 @@ public class Resource<T:ResponseDescriptor> : BaseResource<T> {
         var currentPage = 0
         var results : [T.ReturnType] = []
         
-        /*var url = request.URL!
-        url = NSMutableURL(scheme: url.scheme, host: url.host, path: url.path!)!
-        url.port = request.URL!.port*/
         let url = request.URL!.URLByStrippingQuery()
         let req = request.mutableCopy() as! NSMutableURLRequest
         req.URL = url
-        /*for (key, value) in request.allHTTPHeaderFields! {
-            req.setValue(value, forHTTPHeaderField: key)
-        }*/
         
         func next (var page: Int) {
             self.requestPage(page, request: req, parameters: params, progress: progress, completion: { (data, error) -> Void in
@@ -104,7 +95,7 @@ public class Resource<T:ResponseDescriptor> : BaseResource<T> {
         if (req == nil) {
             return completion(data: nil, error: NSError(domain: "com.softshag.restler", code: 1, userInfo: nil))
         }
-        print("HEADER \(req?.allHTTPHeaderFields)")
+        
         return super.request(req!, progress: progress, completion:completion)
         
     }

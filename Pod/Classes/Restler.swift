@@ -113,7 +113,7 @@ public class Restler : NSObject {
     private let mapping_queue : dispatch_queue_t = dispatch_queue_create(kRestlerMappingQueue, DISPATCH_QUEUE_CONCURRENT)
     
     var resources : [IResource] = []
-    var reachability: Reachability
+    //var reachability: Reachability
     
     private var _reachabilityCheck: Bool = false
     private var _lock: NSObject = NSObject()
@@ -141,7 +141,7 @@ public class Restler : NSObject {
         self.manager = Alamofire.Manager(configuration: configuration)
         
         self.baseURL = url
-        self.reachability = Reachability(hostname: url.host!)!
+        
     }
     
     func request(URLRequest: NSURLRequest, progress: ProgressBlock?, completion:(req:NSURLRequest?, res:NSHTTPURLResponse?, data:AnyObject?, error:ErrorType?) -> Void) {
@@ -187,7 +187,10 @@ public class Restler : NSObject {
         
     }
     
-    func isReachable () -> Promise<Bool, ErrorType> {
+    public func isReachable () -> Promise<Bool, ErrorType> {
+        
+        let reachability = Reachability(hostname: self.baseURL.host!)!
+        
         let source = PromiseSource<Bool, ErrorType>()
         _listeners.append(source)
         
@@ -198,7 +201,7 @@ public class Restler : NSObject {
         self.reachabilityCheck = true
         
         let checker = { [unowned self] (r:Reachability) in
-            self.reachability.stopNotifier()
+            reachability.stopNotifier()
             let listeners = self._listeners
             self._listeners = []
             self.reachabilityCheck = false
@@ -209,13 +212,12 @@ public class Restler : NSObject {
                 s.resolve(r.isReachable())
             }
         }
-        if self.reachability.whenReachable == nil {
-            self.reachability.whenReachable = checker
-            self.reachability.whenUnreachable = checker
-        }
+        
+        reachability.whenReachable = checker
+        reachability.whenUnreachable = checker
         
         
-        self.reachability.startNotifier()
+        reachability.startNotifier()
         
         return source.promise
         

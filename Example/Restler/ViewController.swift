@@ -110,6 +110,11 @@ class ViewController: UIViewController {
         .parameters["access"] = "mobile"
         
         restler.fetch("concerts")
+        .then { (r) -> Void in
+            print("done: \(r.count)")
+        }.trap { (e) -> Void in
+            print("error \(e)")
+        }
         
         /*restler.fetch(["concerts","genre"])
         .then { (result) -> Void in

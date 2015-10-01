@@ -13,7 +13,6 @@
 		10943EE347EC6D9FC6C2A465B0D28795 /* DStack.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D12DB0C9F50F2D0B04A94A3737F7DC8E /* DStack.bundle */; };
 		125B8152084C0500D79D8EAD98110043 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B60BACC707F873EFACABFA15B767705 /* Foundation.framework */; };
 		12A37C6C8A0180C325D2DB25F215C8F2 /* Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BE3A926A8AB4485A53611F156DA241 /* Download.swift */; };
-		1DC7A1E7CF6D3D44EDC4082481FF4FF0 /* EventEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5529B248BAA9F321A1C58CBF4E5CEFC /* EventEmitter.swift */; };
 		238A8E305C121CFE2E99FB3AB0AA5BF8 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88936E846AB50CC5ACD9B503EE447615 /* Error.swift */; };
 		26F60FD32597CD8F181D32B1BA5AC779 /* concurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65BE88D312412810D2BFBDB456D6776 /* concurrency.swift */; };
 		29BB5EDE3176E448DB8F0CDB55F83778 /* XCGLogger-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 6460E9C0CFE896C2D1CC8FE25365892F /* XCGLogger-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -36,7 +35,6 @@
 		5C8DD2A1607C56905BBB135E5177A973 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80F71FB501DA7A8F1BEDAD67803A6B49 /* Resource.swift */; };
 		5CA09190A6F5A2BD74BA8F034FE365F5 /* ResponseSerialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73DC05986B0D589A92B626853483F7A /* ResponseSerialization.swift */; };
 		5CD6F5BEA7375DA97EFCD86D2AF29D4A /* NSURL+Restler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FD6BCA48063FA29A3434E8C171799F /* NSURL+Restler.swift */; };
-		65768E3B8DE82B6BC82B61B5931EF84E /* PaginatedResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BEEBB02CB4384B2D4A32F70135635D8 /* PaginatedResource.swift */; };
 		6582EE35964D1860DA4C0585201509CB /* Validation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED5924E0DA682B350A57F776F066C28 /* Validation.swift */; };
 		6D931B48C708BB32B91AE275A86472DB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B60BACC707F873EFACABFA15B767705 /* Foundation.framework */; };
 		6E60AD3C8EC9143DB23045FC72FB6E11 /* Pods-Restler_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 320590693C665EF814E90D5332F36C04 /* Pods-Restler_Tests-dummy.m */; };
@@ -246,7 +244,6 @@
 		07E5380007118DE3CA785C8B6EFF5B79 /* ReachabilitySwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReachabilitySwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		07FB4C36A7D07F1A4AD102E364DC4331 /* Pods_Restler_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Restler_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		094F39BF7BFF3534DBB1E4D4C42B8A1E /* Restler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Restler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		0BEEBB02CB4384B2D4A32F70135635D8 /* PaginatedResource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaginatedResource.swift; sourceTree = "<group>"; };
 		10BE3A926A8AB4485A53611F156DA241 /* Download.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Download.swift; path = Source/Download.swift; sourceTree = "<group>"; };
 		10DBFC3BA1C556327C1E0F5D7FFA479D /* Restler-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Restler-dummy.m"; sourceTree = "<group>"; };
 		12C6BDE42AD7235F13F27627C9ED8B4C /* XCGLogger.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XCGLogger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -330,7 +327,6 @@
 		BBC0C6A2DF95EB08D2362DB6D423F537 /* XCGLogger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = XCGLogger.swift; path = XCGLogger/Library/XCGLogger/XCGLogger.swift; sourceTree = "<group>"; };
 		BFB793F12F782E483536A709B0B6DC96 /* Promissum.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "sourcecode.module-map"; path = Promissum.modulemap; sourceTree = "<group>"; };
 		C423D0B154318CE9B026326919BC115E /* XCGLogger-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "XCGLogger-prefix.pch"; sourceTree = "<group>"; };
-		C5529B248BAA9F321A1C58CBF4E5CEFC /* EventEmitter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventEmitter.swift; sourceTree = "<group>"; };
 		C67B546FB180321A70FFC6746BF9D013 /* Response.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
 		C811982A45B97ECB43759884F107B3D5 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.3.sdk/System/Library/Frameworks/CoreData.framework; sourceTree = DEVELOPER_DIR; };
 		CE3F0518FEFC7C7CC3E7FBAA40045FB9 /* Restler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Restler.swift; sourceTree = "<group>"; };
@@ -766,9 +762,7 @@
 			children = (
 				16A557CC574B39580EA3F1083A5A14AD /* BaseResource.swift */,
 				F65BE88D312412810D2BFBDB456D6776 /* concurrency.swift */,
-				C5529B248BAA9F321A1C58CBF4E5CEFC /* EventEmitter.swift */,
 				51FD6BCA48063FA29A3434E8C171799F /* NSURL+Restler.swift */,
-				0BEEBB02CB4384B2D4A32F70135635D8 /* PaginatedResource.swift */,
 				80F71FB501DA7A8F1BEDAD67803A6B49 /* Resource.swift */,
 				C67B546FB180321A70FFC6746BF9D013 /* Response.swift */,
 				CE3F0518FEFC7C7CC3E7FBAA40045FB9 /* Restler.swift */,
@@ -1205,9 +1199,7 @@
 				EA865C58705CB5A0D682DD825DE217A1 /* BaseResource.swift in Sources */,
 				26F60FD32597CD8F181D32B1BA5AC779 /* concurrency.swift in Sources */,
 				3345E0DABF4C1D7287A54F0FDCD6D556 /* coredata.swift in Sources */,
-				1DC7A1E7CF6D3D44EDC4082481FF4FF0 /* EventEmitter.swift in Sources */,
 				5CD6F5BEA7375DA97EFCD86D2AF29D4A /* NSURL+Restler.swift in Sources */,
-				65768E3B8DE82B6BC82B61B5931EF84E /* PaginatedResource.swift in Sources */,
 				5C8DD2A1607C56905BBB135E5177A973 /* Resource.swift in Sources */,
 				C20607EB5E9EABEA4F9F60E7F9DF5D71 /* Response.swift in Sources */,
 				FD04E2421721A07A400990DD51E153CA /* Restler-dummy.m in Sources */,

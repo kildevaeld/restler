@@ -94,7 +94,7 @@ public class BaseResource<T:ResponseDescriptor where T.ReturnType:AnyObject> : I
     
     func request(request: NSURLRequest, progress: ProgressBlock?, completion:(data:[T.ReturnType]?, error:ErrorType?) -> Void) {
     
-        self.lastUpdate = NSDate()
+        //self.lastUpdate = NSDate()
         
         self.restler.request(request, progress: progress) { [unowned self] (req, res, data, error) -> Void in
             
@@ -125,7 +125,7 @@ public class BaseResource<T:ResponseDescriptor where T.ReturnType:AnyObject> : I
         
     }
     
-    public func request (path: String, parameters: Parameters?, method: Alamofire.Method = .GET, progress: ProgressBlock? = nil) -> Promise<[T.ReturnType]?, ErrorType> {
+    func request (path: String, parameters: Parameters?, method: Alamofire.Method = .GET, progress: ProgressBlock? = nil) -> Promise<[T.ReturnType]?, ErrorType> {
         
         let promiseSource = PromiseSource<[T.ReturnType]?, ErrorType>()
         
@@ -164,7 +164,7 @@ public class BaseResource<T:ResponseDescriptor where T.ReturnType:AnyObject> : I
     
     
     // MARK: - Internals
-    func getRequest (method: Alamofire.Method = .GET, path: String, parameters: Parameters?) throws -> (request: NSURLRequest, parameters: Parameters) {
+    private func getRequest (method: Alamofire.Method = .GET, path: String, parameters: Parameters?) throws -> (request: NSURLRequest, parameters: Parameters) {
         
         let url = self.baseURL.URLByAppendingPathComponent(path)
         var request = NSMutableURLRequest(URL: url)
