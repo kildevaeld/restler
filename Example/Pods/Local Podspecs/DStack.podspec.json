@@ -22,5 +22,10 @@
       "Pod/Assets/*.png"
     ]
   },
-  "frameworks": "CoreData"
+  "frameworks": "CoreData",
+  "dependencies": {
+    "XCGLogger": [
+      "~> 3.0"
+    ]
+  }
 }

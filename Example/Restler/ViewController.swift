@@ -45,21 +45,21 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let url = NSURL(string:"http://localhost:3000")
+        let url = NSURL(string:"http://api.livejazz.dk")
         let restler = Restler(url:url!)
         //restler.baseURL =
         let dstack = DStack.with("test_db.sqlite")!
         
         
         
-        let descriptor = EntityDescriptor(dstack.rootContext, map: { (context, value) -> AnyObject? in
+        let descriptor = EntityDescriptor(dstack, map: { (context, value) throws -> Concert? in
             
             
             
             if value["id"] == nil {
                 return nil
             }
-            let concert: Concert = context.insertEntity()
+            let concert: Concert = try context.insertEntity()
             
             concert.id = value["id"].intValue
             concert.title = value["name"].stringValue
@@ -73,13 +73,13 @@ class ViewController: UIViewController {
             
         })
         
-        let genreDescriptor = EntityDescriptor(dstack.rootContext, map:{ (context, value) -> Genre? in
+        let genreDescriptor = EntityDescriptor(dstack, map:{ (context, value) throws -> Genre? in
             
             if value["id"] == nil {
                 return nil
             }
             
-            let genre: Genre = context.insertEntity()
+            let genre: Genre = try context.insertEntity()
             genre.name = value["name"].stringValue
             genre.desc = value["description"].stringValue
             genre.id = value["id"].intValue
@@ -109,9 +109,11 @@ class ViewController: UIViewController {
         .setOnRequest(header)
         .parameters["access"] = "mobile"
         
+        let timer = ParkBenchTimer()
         restler.fetch("concerts")
         .then { (r) -> Void in
-            print("done: \(r.count)")
+            print("done: \(r.count), time: \(timer.stop())")
+            
         }.trap { (e) -> Void in
             print("error \(e)")
         }

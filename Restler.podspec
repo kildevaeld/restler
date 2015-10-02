@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "Restler"
-  s.version          = "0.0.1"
+  s.version          = "0.2.0"
   s.summary          = "A short description of Restler."
   s.description      = <<-DESC
                        An optional longer description of Restler
@@ -36,7 +36,7 @@ Pod::Spec.new do |s|
      cd.source_files = 'Pod/Classes/CoreData/**/*'
      cd.framework = 'CoreData'
      cd.dependency 'DStack'
-     
+
   end
 
 #s.dependency 'Bolts/Tasks'
