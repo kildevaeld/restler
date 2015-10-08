@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "Restler"
-  s.version          = "0.2.0"
+  s.version          = "0.2.1"
   s.summary          = "A short description of Restler."
   s.description      = <<-DESC
                        An optional longer description of Restler
@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
 
   s.license          = 'MIT'
   s.author           = { "Softshag & Me" => "admin@softshag.dk" }
-  s.source           = { :git => "https://github.com/kildevaeld/restler.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/kildevaeld/restler.git", :tag => 'v' + s.version.to_s }
 
   s.platform     = :ios, '8.0'
   s.requires_arc = true
@@ -35,7 +35,7 @@ Pod::Spec.new do |s|
   s.subspec 'CoreData' do |cd|
      cd.source_files = 'Pod/Classes/CoreData/**/*'
      cd.framework = 'CoreData'
-     cd.dependency 'DStack'
+     cd.dependency 'DStack', '~> 0.2.0'
 
   end
 

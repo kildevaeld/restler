@@ -103,8 +103,11 @@ public class Restler : NSObject {
         //"application/plist": {Alamofire.Request.propertyListResponseSerializer().serializeResponse }]
     static var log: XCGLogger {
         let log = XCGLogger()
-        
-        log.setup(.Debug, showThreadName: false, showLogLevel: true, showFileNames: false, showLineNumbers: false, writeToFile: nil, fileLogLevel: nil)
+        #if RESTLER_DEBUG
+            log.setup(.Debug, showThreadName: true, showLogLevel: true, showFileNames: true, showLineNumbers: true, writeToFile: nil, fileLogLevel: nil)
+        #else
+            log.setup(.Severe, showThreadName: true, showLogLevel: true, showFileNames: true, showLineNumbers: true, writeToFile: nil)
+        #endif
         
         return log
     }
@@ -269,7 +272,7 @@ extension Restler {
             if error != nil {
                 source.reject(error!)
             } else {
-                source.resolve(result!)
+                source.resolve(result ?? [])
             }
         })
         
