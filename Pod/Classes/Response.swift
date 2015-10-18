@@ -2,7 +2,6 @@
 
 
 import Foundation
-import Bolts
 
 public protocol ResponseDescriptor {
     typealias ReturnType: AnyObject
