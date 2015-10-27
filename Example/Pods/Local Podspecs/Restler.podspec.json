@@ -1,6 +1,6 @@
 {
   "name": "Restler",
-  "version": "0.0.1",
+  "version": "0.2.2",
   "summary": "A short description of Restler.",
   "description": "An optional longer description of Restler\n\n* Markdown format.\n* Don't worry about the indent, we strip it!",
   "homepage": "https://github.com/kildevaeld/restler",
@@ -10,7 +10,7 @@
   },
   "source": {
     "git": "https://github.com/kildevaeld/restler.git",
-    "tag": "0.0.1"
+    "tag": "v0.2.2"
   },
   "platforms": {
     "ios": "8.0"
@@ -48,7 +48,7 @@
       "frameworks": "CoreData",
       "dependencies": {
         "DStack": [
-
+          "~> 0.2.0"
         ]
       }
     }

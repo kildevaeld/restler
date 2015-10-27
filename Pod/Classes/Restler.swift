@@ -191,8 +191,14 @@ public class Restler : NSObject {
     }
     
     public func isReachable () -> Promise<Bool, ErrorType> {
+        let reachability: Reachability?
+        do {
+            reachability = try Reachability(hostname: self.baseURL.host!)
+        } catch {
+            reachability = nil
+            return Promise<Bool,ErrorType>(error: error)
+        }
         
-        let reachability = Reachability(hostname: self.baseURL.host!)!
         
         let source = PromiseSource<Bool, ErrorType>()
         _listeners.append(source)
@@ -204,7 +210,7 @@ public class Restler : NSObject {
         self.reachabilityCheck = true
         
         let checker = { [unowned self] (r:Reachability) in
-            reachability.stopNotifier()
+            reachability!.stopNotifier()
             let listeners = self._listeners
             self._listeners = []
             self.reachabilityCheck = false
@@ -216,11 +222,15 @@ public class Restler : NSObject {
             }
         }
         
-        reachability.whenReachable = checker
-        reachability.whenUnreachable = checker
+        reachability!.whenReachable = checker
+        reachability!.whenUnreachable = checker
         
         
-        reachability.startNotifier()
+        do {
+            try reachability!.startNotifier()
+        } catch {
+            return Promise<Bool,ErrorType>(error:error)
+        }
         
         return source.promise
         
