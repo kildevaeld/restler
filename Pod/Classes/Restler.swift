@@ -293,7 +293,10 @@ extension Restler {
     private func createTask(name: String, progress:((name: String) -> Void)?) ->Promise<[AnyObject], ErrorType> {
         let task = self.fetch(name)
         task.finally { () -> Void in
-            progress?(name: name)
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                 progress?(name: name)
+            })
+           
         }
         return task
         
