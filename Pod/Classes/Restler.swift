@@ -279,11 +279,14 @@ extension Restler {
         
         let source = PromiseSource<[AnyObject], ErrorType>()
         resource!.request(params, completion: { (result, error) -> Void in
-            if error != nil {
-                source.reject(error!)
-            } else {
-                source.resolve(result ?? [])
-            }
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                if error != nil {
+                    source.reject(error!)
+                } else {
+                    source.resolve(result ?? [])
+                }
+            })
+            
         })
         
         return source.promise
