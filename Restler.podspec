@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "Restler"
-  s.version          = "0.2.2"
+  s.version          = "0.2.4"
   s.summary          = "A short description of Restler."
   s.description      = <<-DESC
                        An optional longer description of Restler
